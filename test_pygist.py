@@ -21,7 +21,7 @@ patience = 1
 
 class SyntaxTest(unittest.TestCase):
 
-    def testSstr(self):
+    def test_sstr(self):
         s = sstr("one")
         self.assertEqual(s.__str__(), "one")
         self.assertEqual(s.__repr__(), "one")
@@ -31,9 +31,9 @@ class IntrospectionTest(unittest.TestCase):
         self.tf = tempfile.TemporaryFile()
 
         def func(x): return x
-        class testNewObj (object):
+        class test_new_obj (object):
             def method(self): pass
-        class testOldObj: 
+        class test_old_obj: 
             def method(self): pass
 
         # self.objs is a list of an example of each type of object
@@ -64,14 +64,14 @@ class IntrospectionTest(unittest.TestCase):
                      self.tf,    # File
                      1.1,  # Float
                      func, # function
-                     testNewObj(), # New style instance
-                     testOldObj(), # Old style instance
+                     test_new_obj(), # New style instance
+                     test_old_obj(), # Old style instance
                      1, # Int
                      lambda x: x, # Lambda 
                      [1, 2], # List
                      1L, # Long 
-                     testNewObj().method, # Method
-                     testOldObj().method,                
+                     test_new_obj().method, # Method
+                     test_old_obj().method,                
                      unittest, # Module
                      None, # None
                      object(), # Object
@@ -79,15 +79,15 @@ class IntrospectionTest(unittest.TestCase):
                      'blah', # String
                      (1,2),  # Tuple
                      int, # type
-                     testNewObj.method,   # Unbound Method -- unbound and bound
-                     testOldObj.method,   # methods actually the same type w/
+                     test_new_obj.method,   # Unbound Method -- unbound and bound
+                     test_old_obj.method,   # methods actually the same type w/
                                           # different names in types module
                      u'blah', # unicode
                      xrange(3), # xrange
                      ]
 
         # These I found in __builtins__
-        self.objs += [super(testNewObj),  # Super
+        self.objs += [super(test_new_obj),  # Super
                       staticmethod(func), # staticmethod                
                       classmethod(func), # classmethod
                       property(),
@@ -107,7 +107,7 @@ class IntrospectionTest(unittest.TestCase):
     def tearDown(self):
         self.tf.close()
         
-    def testRtype(self):
+    def test_rtype(self):
         rtype(self.objs)
 
         # These should not be strings
@@ -139,7 +139,7 @@ class IntrospectionTest(unittest.TestCase):
         self.assertEqual(len( rtype([set((1,2)), set((3,4))]) ), 2)
         self.assertEqual(len( rtype([frozenset((1,2)), frozenset((3,4))]) ), 2)
 
-    def testRtypeArrays(self):
+    def test_rtype_arrays(self):
         self.assertTrue(type( rtype(numpy.array([1,2]))) is str)
         self.assertTrue(type( rtype([numpy.array([1,2]), numpy.array([1,2])])) is list)
         
@@ -148,24 +148,24 @@ class IntrospectionTest(unittest.TestCase):
         # recognized substructure => length 2, not 3
         self.assertEqual(len(rtype(a)), 2)
     
-    def testTypeCoverage(self):        
+    def test_type_coverage(self):        
         # Check to see if any types aren't covered        
-        coveredTypes = self.excludes + [type(obj) for obj in self.objs]
+        covered_types = self.excludes + [type(obj) for obj in self.objs]
         els = __builtins__.values() \
               + [getattr(types, name) for name in dir(types)] 
-        allTypes = [el for el in els if type(el) is type]
+        all_types = [el for el in els if type(el) is type]
 
-        isCovered = [t in coveredTypes
+        is_covered = [t in covered_types
                      # don't bother explicitly listing all exceptions
                      or issubclass(t, Exception)
                      # TODO -- something weird is going on with class types
                      or t is types.ClassType
                      # TODO -- strange -- reversed is in the list of objects
                      or t is reversed
-                     for t in allTypes]
-        self.assertTrue(every(isCovered))
+                     for t in all_types]
+        self.assertTrue(every(is_covered))
 
-    def testGist(self):
+    def test_gist(self):
         for el in self.objs:
             gist(el, verbose=True)
 
@@ -174,7 +174,7 @@ class AproposTest(unittest.TestCase):
     # _apropos  apropos
 
     # @unittest.skipIf(test_cfg.patience < 1, "Not patient enough.")
-    def testAproposName(self):
+    def test_apropos_name(self):
         
         class Composite:
             def __init__(self):
@@ -197,19 +197,19 @@ class AproposTest(unittest.TestCase):
         self.assertEqual(apropos_name('foo', Composite(), name='name'),
                          ['name.foo'])
 
-    def testMaxDepth(self):
+    def test_max_depth(self):
         lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
-                          maxDepth=0)
+                          max_depth=0)
         self.assertFalse('arg][foo][foo]' in lst)
         self.assertFalse('arg][foo]' in lst)
 
         lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
-                          maxDepth=1)
+                          max_depth=1)
         self.assertFalse('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
         lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
-                          maxDepth=2)
+                          max_depth=2)
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
@@ -217,7 +217,7 @@ class AproposTest(unittest.TestCase):
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
-    def testSyntax(self):
+    def test_syntax(self):
         """Functionality has been tested... just make sure that these
         functions can be called"""
         class Composite:
@@ -238,7 +238,7 @@ class AproposTest(unittest.TestCase):
         self.assertEqual(apropos_doc_regexp ('^foo', Composite('theFoo')),
                          [])
             
-    def testNullIntrospector(self):
+    def test_NullIntrospector(self):
         i = NullIntrospector()
         # I think this is how this is supposed to work
         self.assertEqual(id(i), id(i.__iter__()))
@@ -247,7 +247,7 @@ class AproposTest(unittest.TestCase):
         # make sure code doens't freak out
         i = NullIntrospector(exclude='_')
 
-    def testListIntrospector(self):
+    def test_ListIntrospector(self):
         i = ListIntrospector([1,2])
         self.assertEqual(id(i), id(i.__iter__()))
         self.assertEqual(i.next(), (1, None, '[0]'))
@@ -257,7 +257,7 @@ class AproposTest(unittest.TestCase):
         # make sure code doens't freak out
         i = ListIntrospector([1,2], exclude='_')
 
-    def testInstanceIntrospector(self):
+    def test_InstanceIntrospector(self):
         class Composite:
             pass
 
@@ -280,7 +280,7 @@ class AproposTest(unittest.TestCase):
         self.assertFalse((None, None, '.__doc__') in lst)
         self.assertEqual(len(lst), 2)
 
-    def testDictIntrospector(self):
+    def test_DictIntrospector(self):
         lst = [el for el in DictIntrospector(dict(a=1,_b=2))]
 
         self.assertEqual(len(lst), 2)
@@ -292,7 +292,7 @@ class AproposTest(unittest.TestCase):
         self.assertTrue((1, 'a', '[a]') in lst)
         self.assertFalse((2, '_b', '[_b]') in lst)            
 
-    def testSearchName(self):
+    def test_search_name(self):
         self.assertTrue(search_name('needle', 'the needle', None))
         self.assertTrue(search_name('needle', 'needle more', None))
         self.assertTrue(search_name('needle', 'the needle more', None))
@@ -300,7 +300,7 @@ class AproposTest(unittest.TestCase):
         # Make sure function doesn't freak out for no name
         self.assertFalse(search_name('needle', None, None))
         
-    def testSearchValue(self):
+    def test_search_value(self):
         class Composite:
             def __init__(self, str):
                 self._str = str
@@ -325,24 +325,24 @@ class AproposTest(unittest.TestCase):
                                     dict(a='needle', b=2, c=3)))
 
         
-    def testSearchDoc(self):   
+    def test_search_doc(self):   
         class Composite:
             def __init__(self, str):
                 self.__doc__ = str
 
-        self.assertTrue(searchDoc('needle', None,
+        self.assertTrue(search_doc('needle', None,
                                   Composite('the needle')))
-        self.assertTrue(searchDoc('needle', None,
+        self.assertTrue(search_doc('needle', None,
                                   Composite('needle more')))
-        self.assertTrue(searchDoc('needle', None,
+        self.assertTrue(search_doc('needle', None,
                                   Composite('the needle more')))
 
         # Make sure search fn doesn't freak out
-        self.assertFalse(searchDoc('needle', None,
+        self.assertFalse(search_doc('needle', None,
                                    Composite(None)))
 
         
-    def testSearchNameRegexp(self):  
+    def test_search_name_regexp(self):  
         self.assertFalse(search_name_regexp('^needle', 'the needle', None))
         self.assertTrue(search_name_regexp('^needle', 'needle more', None))
         self.assertFalse(search_name_regexp('^needle', 'the needle more', None))
@@ -350,7 +350,7 @@ class AproposTest(unittest.TestCase):
         # Make sure function doesn't freak out for no name
         self.assertFalse(search_name('^needle', None, None))
 
-    def testSearchValueRegexp(self): 
+    def test_search_value_regexp(self): 
         class Composite:
             def __init__(self, str):
                 self._str = str
@@ -374,20 +374,20 @@ class AproposTest(unittest.TestCase):
         self.assertFalse(search_value_regexp('needle', None,
                                            dict(a='needle', b=2, c=3)))
 
-    def testSearchDocRegexp(self):   
+    def test_search_doc_regexp(self):   
         class Composite:
             def __init__(self, str):
                 self.__doc__ = str
 
-        self.assertFalse(searchDocRegexp('^needle', None,
+        self.assertFalse(search_doc_regexp('^needle', None,
                                          Composite('the needle')))
-        self.assertTrue(searchDocRegexp('^needle', None,
+        self.assertTrue(search_doc_regexp('^needle', None,
                                         Composite('needle more')))
-        self.assertFalse(searchDocRegexp('^needle', None,
+        self.assertFalse(search_doc_regexp('^needle', None,
                                          Composite('the needle more')))
 
         # Make sure function doesn't freak out if no doc
-        self.assertFalse(searchDocRegexp('^needle', None,
+        self.assertFalse(search_doc_regexp('^needle', None,
                                          Composite(None)))
 
 def test():

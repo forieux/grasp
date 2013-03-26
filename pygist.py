@@ -37,7 +37,7 @@ def gist(obj, verbose=False, pretty=True):
     types = sorted(set([el[1] for el in info]))
     result = {}
     for t in types:
-        names = [string(name) for name, theType in info if theType is t]        
+        names = [string(name) for name, the_type in info if the_type is t]        
         result[string(t.__name__)] = names
         #result.append((t.__name__, names))
     return result
@@ -58,13 +58,13 @@ composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
 def rtype(obj, max=50):
     """Recursive type() function.  Try to give a concise description
     of the type of an object and all objects it contains."""
-    def rtypesEqual(els):
-        firstType = rtype(els[0])
-        return every([ rtype(el) == firstType for el in els])
-    def typesEqual(els):
-        firstType = type(els[0])
-        return every([ type(el) is firstType for el in els])
-    def typesSimple(els):
+    def rtypes_equal(els):
+        first_type = rtype(els[0])
+        return every([ rtype(el) == first_type for el in els])
+    def types_equal(els):
+        first_type = type(els[0])
+        return every([ type(el) is first_type for el in els])
+    def types_simple(els):
         return every([ type(el) in simple_types for el in els])
     def name(obj):
         return type(obj).__name__
@@ -79,9 +79,9 @@ def rtype(obj, max=50):
         return None
     
     if type(obj) in composite_types:
-        if typesEqual(contents(obj)) and typesSimple(contents(obj)):
+        if types_equal(contents(obj)) and types_simple(contents(obj)):
             return '%s of %s %s' % (name(obj), shape(obj), name(contents(obj)[0]))
-        elif rtypesEqual(contents(obj)):
+        elif rtypes_equal(contents(obj)):
             return ['%s of %s' % (name(obj), shape(obj)), rtype(contents(obj)[0])]
         elif len(contents(obj)) > max:
             return ['%s of' % name(obj)] \
@@ -98,7 +98,7 @@ def rtype(obj, max=50):
 # below, you can give it a function called __apropos__.  This function
 # takes no arguments and should return an iterator.  The iterator
 # should return the contents of the object, as tuples of
-# (elementObject, nameString, accessString)
+# (element_object, name_string, access_string)
 
 # Must respond to __iter__ and [string].  Designed for things you
 # access via [string]
@@ -125,7 +125,7 @@ def apropos_name(needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_name, **kw)
+    return apropos(needle, haystack, search=search_name, **kw)
 
 def apropos_value(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a
@@ -135,7 +135,7 @@ def apropos_value(needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_value, **kw)
+    return apropos(needle, haystack, search=search_value, **kw)
 
 def apropos_doc(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a
@@ -145,7 +145,7 @@ def apropos_doc(needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_doc, **kw)
+    return apropos(needle, haystack, search=search_doc, **kw)
 
 def apropos_name_regexp (needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
@@ -154,7 +154,7 @@ def apropos_name_regexp (needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_name_regexp, **kw)
+    return apropos(needle, haystack, search=search_name_regexp, **kw)
 
 def apropos_value_regexp(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
@@ -164,7 +164,7 @@ def apropos_value_regexp(needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_value_regexp, **kw)
+    return apropos(needle, haystack, search=search_value_regexp, **kw)
 
 def apropos_doc_regexp(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
@@ -174,11 +174,11 @@ def apropos_doc_regexp(needle, haystack=None, **kw):
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=search_doc_regexp, **kw)
+    return apropos(needle, haystack, search=search_doc_regexp, **kw)
 
 ## Handles default values of arguments
 def apropos(needle, haystack=None, name=None,
-            searchFn=None, **kw):
+            search=None, **kw):
     """Recursively search through haystack looking for needle.
     Typical usage is apropos('string', module).
     
@@ -190,9 +190,9 @@ def apropos(needle, haystack=None, name=None,
     'accessor' strings that are returned.  If not specified, defaults
     to 'arg'.
     
-    Matches determined by searchFn.  searchFn(needle, name, obj)
+    Matches determined by search.  search(needle, name, obj)
     returns true if the object should be considered a match.  By
-    default, searchFn matches if needle is a substring of the name of
+    default, search matches if needle is a substring of the name of
     the object.
 
     Return a list of strings showing the path to reach the matching
@@ -206,9 +206,9 @@ def apropos(needle, haystack=None, name=None,
         else:
             name = 'arg'
     
-    if searchFn is None: searchFn = search_name
+    if search is None: search = search_name
 
-    return _apropos(needle, haystack, name, searchFn, **kw)
+    return _apropos(needle, haystack, name, search, **kw)
 
 ##################################################
 ## Common search functions
@@ -248,17 +248,17 @@ def search_doc_regexp(needle, name, obj):
 ##################################################
 ## The guts
 
-def _apropos(needle, haystack, haystackName,
-             searchFn, maxDepth=None, **kw):
+def _apropos(needle, haystack, haystack_name,
+             search, max_depth=None, **kw):
     """Recursively search through haystack looking for needle.
 
     haystack can be any python object.  Typically it's a module.  If
     it's not given, it's the dict returned by globals() (ie, watch
     out, it's going to take a while).
     
-    Matches determined by searchFn.  searchFn(needle, name, obj)
+    Matches determined by search.  search(needle, name, obj)
     returns true if the object should be considered a match.  By
-    default, searchFn matches if needle is a substring of the name of
+    default, search matches if needle is a substring of the name of
     the object.  
 
     name is the name of the top level object.  It's first bit of the
@@ -267,28 +267,28 @@ def _apropos(needle, haystack, haystackName,
 
     Return a list of strings showing the path to reach the matching
     object."""
-    def search(haystack, haystackName, fullName, depth):
-        '''Free variable: needle, searchTypes'''
-        # print "Searched", len(searchedIds), "Searching", depth, fullName
-        if searchFn(needle, haystackName, haystack):
-            found.append(fullName)
+    def search_internal(haystack, haystack_name, full_name, depth):
+        '''Free variable: needle, search_types'''
+        # print "Searched", len(searched_ids), "Searching", depth, full_name
+        if search(needle, haystack_name, haystack):
+            found.append(full_name)
 
         # break apart if obj is not already searched
-        if type(haystack) in searchTypes \
-                and (not maxDepth or depth < maxDepth) \
-                and id(haystack) not in searchedIds:
+        if type(haystack) in search_types \
+                and (not max_depth or depth < max_depth) \
+                and id(haystack) not in searched_ids:
             # Prevent loops with circular references by setting this
             # _before_ descending into sub-objects
-            searchedIds.append(id(haystack))
+            searched_ids.append(id(haystack))
 
-            for hay, hayName, hayAccess in introspect(haystack, **kw):
-                search(hay, hayName, fullName + hayAccess, depth+1)
+            for hay, hay_name, hay_access in introspect(haystack, **kw):
+                search_internal(hay, hay_name, full_name + hay_access, depth+1)
 
-    searchedIds = []
+    searched_ids = []
     found = []
-    searchTypes = dict_types + list_types + instance_types
+    search_types = dict_types + list_types + instance_types
 
-    search(haystack, haystackName, haystackName, 0)
+    search_internal(haystack, haystack_name, haystack_name, 0)
     return found
 
 def introspect(obj, **kw):
@@ -331,7 +331,7 @@ class DictIntrospector (Introspector):
         self.exclude = exclude
         
     def next(self):
-        # return tuple of obj, name, accessName
+        # return tuple of obj, name, access_name
         k = self.iter.next()
         # TODO -- completely skip non-string key entries
         while type(k) is not types.StringType \
@@ -347,7 +347,7 @@ class ListIntrospector (Introspector):
         self.i = 0
 
     def next(self):
-        # return tuple of obj, name, accessName
+        # return tuple of obj, name, access_name
         self.i += 1
         return self.iter.next(), None, '[' + str(self.i-1) + ']'
 
@@ -359,7 +359,7 @@ class InstanceIntrospector (Introspector):
         self.exclude = exclude
 
     def next(self):
-        # return tuple of obj, name, accessName
+        # return tuple of obj, name, access_name
 
         # IPython structs allow non-string attributes.  Filter them
         # out because they cause problems.  That is, you have to
