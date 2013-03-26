@@ -9,6 +9,7 @@ if not hasattr(unittest, 'skipIf'):
             the unittest2 module."""
 
 import tempfile
+import pygist
 from pygist import *
 
 ## Make it easy to skip long-running tests.  
@@ -189,11 +190,9 @@ class AproposTest(unittest.TestCase):
         self.assertEqual(aproposName('foo', Composite()),
                          ['arg.foo'])
 
-        lst = aproposName('aproposName', aproposModule, exclude='_')
-        self.assertTrue('apropos.aproposName' in lst)
-        self.assertTrue('apropos.aproposNameRegexp' in lst)
-        self.assertFalse('apropos.__builtins__[_ip].user_ns[aproposName]'
-                         in lst)
+        lst = aproposName('aproposName', pygist)
+        self.assertTrue('pygist.aproposName' in lst)
+        self.assertTrue('pygist.aproposNameRegexp' in lst)
 
         self.assertEqual(aproposName('foo', Composite(), name='name'),
                          ['name.foo'])
@@ -269,7 +268,7 @@ class AproposTest(unittest.TestCase):
         lst = [el for el in InstanceIntrospector(c)]
         # depending on how I'm running the test, one or the other of
         # these should be in the list
-        self.assertTrue(('test_apropos', '__module__', '.__module__') in lst
+        self.assertTrue(('test_pygist', '__module__', '.__module__') in lst
                         or ('__builtin__', '__module__', '.__module__') in lst)
         self.assertTrue((None, '__doc__', '.__doc__') in lst)
         self.assertTrue((1, 'a', '.a') in lst)
