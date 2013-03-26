@@ -9,19 +9,19 @@ import numpy
 __version__ = 0.2
 __author__ = "Greg Novak <greg.novak@gmail.com>"
 
-# For rtypes
-rtype_simple_types = [bool, complex, float, int, long, str, unicode,
-               types.NoneType,
-               numpy.bool8,
-               numpy.complex64, numpy.complex128,
-               numpy.float32, numpy.float64,
-               numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
-               numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+# For recursive_types
+recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
+                               types.NoneType,
+                               numpy.bool8,
+                               numpy.complex64, numpy.complex128,
+                               numpy.float32, numpy.float64,
+                               numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
+                               numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
 
 if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-    rtype_simple_types += [numpy.float128, numpy.complex256]
+    recursive_type_simple_types += [numpy.float128, numpy.complex256]
         
-rtype_composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
+recursive_type_composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
 
 # For apropos searches.
 #
@@ -80,17 +80,17 @@ def gist(obj, verbose=False, pretty=True):
         #result.append((t.__name__, names))
     return result
 
-def rtype(obj, max=50):
+def recursive_type(obj, max=50):
     """Recursive type() function.  Try to give a concise description
     of the type of an object and all objects it contains."""
     def rtypes_equal(els):
-        first_type = rtype(els[0])
-        return every([ rtype(el) == first_type for el in els])
+        first_type = recursive_type(els[0])
+        return every([ recursive_type(el) == first_type for el in els])
     def types_equal(els):
         first_type = type(els[0])
         return every([ type(el) is first_type for el in els])
     def types_simple(els):
-        return every([ type(el) in rtype_simple_types for el in els])
+        return every([ type(el) in recursive_type_simple_types for el in els])
     def name(obj):
         return type(obj).__name__
     def shape(obj):
@@ -103,18 +103,18 @@ def rtype(obj, max=50):
         elif type(obj) is numpy.ndarray: return obj.flat
         return None
     
-    if type(obj) in rtype_composite_types:
+    if type(obj) in recursive_type_composite_types:
         if types_equal(contents(obj)) and types_simple(contents(obj)):
             return '%s of %s %s' % (name(obj), shape(obj), name(contents(obj)[0]))
         elif rtypes_equal(contents(obj)):
-            return ['%s of %s' % (name(obj), shape(obj)), rtype(contents(obj)[0])]
+            return ['%s of %s' % (name(obj), shape(obj)), recursive_type(contents(obj)[0])]
         elif len(contents(obj)) > max:
             return ['%s of' % name(obj)] \
-                   + [rtype(el) for el in contents(obj) [:max] ] \
+                   + [recursive_type(el) for el in contents(obj) [:max] ] \
                    + ['........']
         else: 
             return ['%s of' % name(obj)] \
-                   + [rtype(el) for el in contents(obj)]         
+                   + [recursive_type(el) for el in contents(obj)]         
     return name(obj)
 
 ##################################################

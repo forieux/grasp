@@ -107,46 +107,46 @@ class IntrospectionTest(unittest.TestCase):
     def tearDown(self):
         self.tf.close()
         
-    def test_rtype(self):
-        rtype(self.objs)
+    def test_recursive_type(self):
+        recursive_type(self.objs)
 
         # These should not be strings
-        self.assertTrue(type( rtype((1,2,3.0))) is list)
-        self.assertTrue(type( rtype([1,2,3.0])) is list)
-        self.assertTrue(type( rtype(dict(a=1, b=2, c=3.0))) is list)
-        self.assertTrue(type( rtype(set((1,2,3.0)))) is list)
-        self.assertTrue(type( rtype(frozenset((1,2,3.0)))) is list)
+        self.assertTrue(type( recursive_type((1,2,3.0))) is list)
+        self.assertTrue(type( recursive_type([1,2,3.0])) is list)
+        self.assertTrue(type( recursive_type(dict(a=1, b=2, c=3.0))) is list)
+        self.assertTrue(type( recursive_type(set((1,2,3.0)))) is list)
+        self.assertTrue(type( recursive_type(frozenset((1,2,3.0)))) is list)
 
         # These should be strings
-        self.assertTrue(type( rtype((1,2,3))) is str)
-        self.assertTrue(type( rtype([1,2,3])) is str)
-        self.assertTrue(type( rtype(dict(a=1, b=2, c=3))) is str)
-        self.assertTrue(type( rtype(set((1,2,3)))) is str)
-        self.assertTrue(type( rtype(frozenset((1,2,3)))) is str)
+        self.assertTrue(type( recursive_type((1,2,3))) is str)
+        self.assertTrue(type( recursive_type([1,2,3])) is str)
+        self.assertTrue(type( recursive_type(dict(a=1, b=2, c=3))) is str)
+        self.assertTrue(type( recursive_type(set((1,2,3)))) is str)
+        self.assertTrue(type( recursive_type(frozenset((1,2,3)))) is str)
 
         # If the regular substructure is recognized, these should have
         # length 2
-        self.assertEqual(len( rtype(((1,2), (3,4))) ), 2)
-        self.assertEqual(len( rtype([(1,2), (3,4)]) ), 2)
-        self.assertEqual(len( rtype(dict(a=(1,2), b=(3,4))) ), 2)
-        self.assertEqual(len( rtype(set(((1,2),(3,4)))) ), 2)
-        self.assertEqual(len( rtype(frozenset(((1,2),(3,4)))) ), 2)
+        self.assertEqual(len( recursive_type(((1,2), (3,4))) ), 2)
+        self.assertEqual(len( recursive_type([(1,2), (3,4)]) ), 2)
+        self.assertEqual(len( recursive_type(dict(a=(1,2), b=(3,4))) ), 2)
+        self.assertEqual(len( recursive_type(set(((1,2),(3,4)))) ), 2)
+        self.assertEqual(len( recursive_type(frozenset(((1,2),(3,4)))) ), 2)
 
         # If the regular substructure is recognized, these should have
         # length 2
-        self.assertEqual(len( rtype([[1,2], [3,4]]) ), 2)
-        self.assertEqual(len( rtype([dict(a=1,b=2), dict(c=3,d=4)]) ), 2)
-        self.assertEqual(len( rtype([set((1,2)), set((3,4))]) ), 2)
-        self.assertEqual(len( rtype([frozenset((1,2)), frozenset((3,4))]) ), 2)
+        self.assertEqual(len( recursive_type([[1,2], [3,4]]) ), 2)
+        self.assertEqual(len( recursive_type([dict(a=1,b=2), dict(c=3,d=4)]) ), 2)
+        self.assertEqual(len( recursive_type([set((1,2)), set((3,4))]) ), 2)
+        self.assertEqual(len( recursive_type([frozenset((1,2)), frozenset((3,4))]) ), 2)
 
-    def test_rtype_arrays(self):
-        self.assertTrue(type( rtype(numpy.array([1,2]))) is str)
-        self.assertTrue(type( rtype([numpy.array([1,2]), numpy.array([1,2])])) is list)
+    def test_recursive_type_arrays(self):
+        self.assertTrue(type( recursive_type(numpy.array([1,2]))) is str)
+        self.assertTrue(type( recursive_type([numpy.array([1,2]), numpy.array([1,2])])) is list)
         
         a = numpy.zeros(2, dtype=object)
         a[:] = (1,2), (3,4)
         # recognized substructure => length 2, not 3
-        self.assertEqual(len(rtype(a)), 2)
+        self.assertEqual(len(recursive_type(a)), 2)
     
     def test_type_coverage(self):        
         # Check to see if any types aren't covered        
