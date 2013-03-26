@@ -10,7 +10,7 @@ __version__ = 0.2
 __author__ = "Greg Novak <greg.novak@gmail.com>"
 
 # For rtypes
-simple_types = [bool, complex, float, int, long, str, unicode,
+rtype_simple_types = [bool, complex, float, int, long, str, unicode,
                types.NoneType,
                numpy.bool8,
                numpy.complex64, numpy.complex128,
@@ -19,9 +19,9 @@ simple_types = [bool, complex, float, int, long, str, unicode,
                numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
 
 if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-    simple_types += [numpy.float128, numpy.complex256]
+    rtype_simple_types += [numpy.float128, numpy.complex256]
         
-composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
+rtype_composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
 
 # For apropos searches.
 #
@@ -90,7 +90,7 @@ def rtype(obj, max=50):
         first_type = type(els[0])
         return every([ type(el) is first_type for el in els])
     def types_simple(els):
-        return every([ type(el) in simple_types for el in els])
+        return every([ type(el) in rtype_simple_types for el in els])
     def name(obj):
         return type(obj).__name__
     def shape(obj):
@@ -103,7 +103,7 @@ def rtype(obj, max=50):
         elif type(obj) is numpy.ndarray: return obj.flat
         return None
     
-    if type(obj) in composite_types:
+    if type(obj) in rtype_composite_types:
         if types_equal(contents(obj)) and types_simple(contents(obj)):
             return '%s of %s %s' % (name(obj), shape(obj), name(contents(obj)[0]))
         elif rtypes_equal(contents(obj)):
