@@ -3,12 +3,24 @@
 # v0.1 19 Dec 2006
 # Code released public domain.  Do whatever you want with it.
 
-import types, re
-try: import numpy
-except ImportError: numpy = False
+# Names:
+# Available (in order of preference)
+# grasp graspy pygrasp pysense discern pygrok getit intuit pyintuit pydiscern pyfathom pygetit 
+# Taken
+# grok sense gist pygist fathom
 
 __version__ = 0.2
 __author__ = "Greg Novak <greg.novak@gmail.com>"
+
+import types, re
+
+# Optionally handle numpy types
+try: import numpy
+except ImportError: numpy = False
+
+# Try to register IPython magic commands, but don't complain if this fails.
+try: import magic
+except: pass
 
 # For recursive_types
 recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
