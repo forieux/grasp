@@ -1,15 +1,10 @@
-# Version history
-# v0.2 14 Jan 2007
-# v0.1 19 Dec 2006
-# Code released public domain.  Do whatever you want with it.
-
 # Names:
 # Available (in order of preference)
 # grasp graspy pygrasp pysense discern pygrok getit intuit pyintuit pydiscern pyfathom pygetit 
 # Taken
 # grok sense gist pygist fathom
 
-__version__ = 0.2
+__version__ = 0.3.0dev
 __author__ = "Greg Novak <greg.novak@gmail.com>"
 
 import types, re
