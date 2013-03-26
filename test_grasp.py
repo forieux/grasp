@@ -9,8 +9,8 @@ if not hasattr(unittest, 'skipIf'):
             the unittest2 module."""
 
 import tempfile
-import pygist
-from pygist import *
+import grasp
+from grasp import *
 
 ## Make it easy to skip long-running tests.  
 ## 0 = tests instantaneous
@@ -191,9 +191,9 @@ class AproposTest(unittest.TestCase):
         self.assertEqual(apropos_name('foo', Composite()),
                          ['arg.foo'])
 
-        lst = apropos_name('apropos_name', pygist)
-        self.assertTrue('pygist.apropos_name' in lst)
-        self.assertTrue('pygist.apropos_name_regexp' in lst)
+        lst = apropos_name('apropos_name', grasp)
+        self.assertTrue('grasp.apropos_name' in lst)
+        self.assertTrue('grasp.apropos_name_regexp' in lst)
 
         self.assertEqual(apropos_name('foo', Composite(), name='name'),
                          ['name.foo'])
@@ -269,7 +269,7 @@ class AproposTest(unittest.TestCase):
         lst = [el for el in InstanceIntrospector(c)]
         # depending on how I'm running the test, one or the other of
         # these should be in the list
-        self.assertTrue(('test_pygist', '__module__', '.__module__') in lst
+        self.assertTrue(('test_grasp', '__module__', '.__module__') in lst
                         or ('__builtin__', '__module__', '.__module__') in lst)
         self.assertTrue((None, '__doc__', '.__doc__') in lst)
         self.assertTrue((1, 'a', '.a') in lst)
