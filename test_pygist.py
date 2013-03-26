@@ -139,6 +139,7 @@ class IntrospectionTest(unittest.TestCase):
         self.assertEqual(len( recursive_type([set((1,2)), set((3,4))]) ), 2)
         self.assertEqual(len( recursive_type([frozenset((1,2)), frozenset((3,4))]) ), 2)
 
+    @unittest.skipIf(not numpy, "Skipping numpy dependent test")
     def test_recursive_type_arrays(self):
         self.assertTrue(type( recursive_type(numpy.array([1,2]))) is str)
         self.assertTrue(type( recursive_type([numpy.array([1,2]), numpy.array([1,2])])) is list)

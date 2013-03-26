@@ -4,24 +4,30 @@
 # Code released public domain.  Do whatever you want with it.
 
 import types, re
-import numpy
+try: import numpy
+except ImportError: numpy = False
 
 __version__ = 0.2
 __author__ = "Greg Novak <greg.novak@gmail.com>"
 
 # For recursive_types
 recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
-                               types.NoneType,
-                               numpy.bool8,
-                               numpy.complex64, numpy.complex128,
-                               numpy.float32, numpy.float64,
-                               numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
-                               numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+                               types.NoneType]
 
-if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-    recursive_type_simple_types += [numpy.float128, numpy.complex256]
+if numpy: 
+    recursive_type_simple_types += [numpy.bool8,
+                                    numpy.complex64, numpy.complex128,
+                                    numpy.float32, numpy.float64,
+                                    numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
+                                    numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+    
+    if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
+        recursive_type_simple_types += [numpy.float128, numpy.complex256]
         
-recursive_type_composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
+recursive_type_composite_types = [list, tuple, dict, set, frozenset]
+
+if numpy:
+    recursive_type_composite_types += [numpy.ndarray]
 
 # For apropos searches.
 #
@@ -93,13 +99,13 @@ def recursive_type(obj, max=50):
     def name(obj):
         return type(obj).__name__
     def shape(obj):
-        if type(obj) is numpy.ndarray: return str(obj.shape)
+        if numpy and type(obj) is numpy.ndarray: return str(obj.shape)
         return str(len(obj))
     def contents(obj):
         if   type(obj) in (list, tuple): return obj
         elif type(obj) in (set, frozenset): return list(obj)
         elif type(obj) is dict: return [obj[k] for k in sorted(obj.keys())]
-        elif type(obj) is numpy.ndarray: return obj.flat
+        elif numpy and type(obj) is numpy.ndarray: return obj.flat
         return None
     
     if type(obj) in recursive_type_composite_types:
