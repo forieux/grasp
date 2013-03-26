@@ -295,7 +295,7 @@ def _apropos(needle, haystack, haystack_name,
         try: 
             if search(needle, haystack_name, haystack):
                 found.append(full_name)
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, UnicodeEncodeError):
             if print_warning[0]:
                 print "String problems at", full_name
                 print_warning[0] = False
