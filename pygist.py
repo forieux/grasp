@@ -9,6 +9,44 @@ import numpy
 __version__ = 0.2
 __author__ = "Greg Novak <greg.novak@gmail.com>"
 
+# For rtypes
+simple_types = [bool, complex, float, int, long, str, unicode,
+               types.NoneType,
+               numpy.bool8,
+               numpy.complex64, numpy.complex128,
+               numpy.float32, numpy.float64,
+               numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
+               numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+
+if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
+    simple_types += [numpy.float128, numpy.complex256]
+        
+composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
+
+# For apropos searches.
+#
+# You can add your own types to these lists if you want apropos to
+# descend into them.  If you have a container that you want apropos to
+# search, but it doesn't respond appropriately to the methods listed
+# below, you can give it a function called __apropos__.  This function
+# takes no arguments and should return an iterator.  The iterator
+# should return the contents of the object, as tuples of
+# (element_object, name_string, access_string)
+
+# Must respond to __iter__ and [string].  Designed for things you
+# access via [string]
+dict_types = [types.DictType]
+# Must respond to __iter__().  Designed for things you access via
+# [int]
+# TODO -- bytearray and memoryview, not sure why they're not showing
+# up in types module.  They look like python builtins
+list_types = [types.ListType, types.TupleType]
+# Must give sensible results to dir(), getattr().  Designed for things
+# you access via .
+instance_types = [types.InstanceType, types.ModuleType]
+# Not sure what to do with memoryview.  Looks like an array but doens't have iter
+# memoryview
+
 class sstr(object):
     """Simple String.  Used for pretty output in IPython (no quotes)."""
     def __init__(self, name): self._name = name        
@@ -41,19 +79,6 @@ def gist(obj, verbose=False, pretty=True):
         result[string(t.__name__)] = names
         #result.append((t.__name__, names))
     return result
-
-simple_types = [bool, complex, float, int, long, str, unicode,
-               types.NoneType,
-               numpy.bool8,
-               numpy.complex64, numpy.complex128,
-               numpy.float32, numpy.float64,
-               numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
-               numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
-
-if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-    simple_types += [numpy.float128, numpy.complex256]
-        
-composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
 
 def rtype(obj, max=50):
     """Recursive type() function.  Try to give a concise description
@@ -91,28 +116,6 @@ def rtype(obj, max=50):
             return ['%s of' % name(obj)] \
                    + [rtype(el) for el in contents(obj)]         
     return name(obj)
-
-# You can add your own types to these lists if you want apropos to
-# descend into them.  If you have a container that you want apropos to
-# search, but it doesn't respond appropriately to the methods listed
-# below, you can give it a function called __apropos__.  This function
-# takes no arguments and should return an iterator.  The iterator
-# should return the contents of the object, as tuples of
-# (element_object, name_string, access_string)
-
-# Must respond to __iter__ and [string].  Designed for things you
-# access via [string]
-dict_types = [types.DictType]
-# Must respond to __iter__().  Designed for things you access via
-# [int]
-# TODO -- bytearray and memoryview, not sure why they're not showing
-# up in types module.  They look like python builtins
-list_types = [types.ListType, types.TupleType]
-# Must give sensible results to dir(), getattr().  Designed for things
-# you access via .
-instance_types = [types.InstanceType, types.ModuleType]
-# Not sure what to do with memoryview.  Looks like an array but doens't have iter
-# memoryview
 
 ##################################################
 ## Interface
