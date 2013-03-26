@@ -284,7 +284,9 @@ def _apropos(needle, haystack, haystack_name,
             if search(needle, haystack_name, haystack):
                 found.append(full_name)
         except UnicodeDecodeError:
-            print "String problems at", full_name
+            if print_warning[0]:
+                print "String problems at", full_name
+                print_warning[0] = False
 
         # break apart if obj is not already searched
         if type(haystack) in search_types \
@@ -297,6 +299,7 @@ def _apropos(needle, haystack, haystack_name,
             for hay, hay_name, hay_access in introspect(haystack, **kw):
                 search_internal(hay, hay_name, full_name + hay_access, depth+1)
 
+    print_warning = [True]
     searched_ids = []
     found = []
     search_types = apropos_dict_types + apropos_list_types + apropos_instance_types
