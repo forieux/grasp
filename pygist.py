@@ -42,7 +42,7 @@ def gist(obj, verbose=False, pretty=True):
         #result.append((t.__name__, names))
     return result
 
-simpleTypes = [bool, complex, float, int, long, str, unicode,
+simple_types = [bool, complex, float, int, long, str, unicode,
                types.NoneType,
                numpy.bool8,
                numpy.complex64, numpy.complex128,
@@ -51,9 +51,9 @@ simpleTypes = [bool, complex, float, int, long, str, unicode,
                numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
 
 if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-    simpleTypes += [numpy.float128, numpy.complex256]
+    simple_types += [numpy.float128, numpy.complex256]
         
-compositeTypes = [list, tuple, dict, set, frozenset, numpy.ndarray,]
+composite_types = [list, tuple, dict, set, frozenset, numpy.ndarray,]
 
 def rtype(obj, max=50):
     """Recursive type() function.  Try to give a concise description
@@ -65,7 +65,7 @@ def rtype(obj, max=50):
         firstType = type(els[0])
         return every([ type(el) is firstType for el in els])
     def typesSimple(els):
-        return every([ type(el) in simpleTypes for el in els])
+        return every([ type(el) in simple_types for el in els])
     def name(obj):
         return type(obj).__name__
     def shape(obj):
@@ -78,7 +78,7 @@ def rtype(obj, max=50):
         elif type(obj) is numpy.ndarray: return obj.flat
         return None
     
-    if type(obj) in compositeTypes:
+    if type(obj) in composite_types:
         if typesEqual(contents(obj)) and typesSimple(contents(obj)):
             return '%s of %s %s' % (name(obj), shape(obj), name(contents(obj)[0]))
         elif rtypesEqual(contents(obj)):
@@ -102,15 +102,15 @@ def rtype(obj, max=50):
 
 # Must respond to __iter__ and [string].  Designed for things you
 # access via [string]
-dictTypes = [types.DictType]
+dict_types = [types.DictType]
 # Must respond to __iter__().  Designed for things you access via
 # [int]
 # TODO -- bytearray and memoryview, not sure why they're not showing
 # up in types module.  They look like python builtins
-listTypes = [types.ListType, types.TupleType]
+list_types = [types.ListType, types.TupleType]
 # Must give sensible results to dir(), getattr().  Designed for things
 # you access via .
-instanceTypes = [types.InstanceType, types.ModuleType]
+instance_types = [types.InstanceType, types.ModuleType]
 # Not sure what to do with memoryview.  Looks like an array but doens't have iter
 # memoryview
 
@@ -286,17 +286,17 @@ def _apropos(needle, haystack, haystackName,
 
     searchedIds = []
     found = []
-    searchTypes = dictTypes + listTypes + instanceTypes
+    searchTypes = dict_types + list_types + instance_types
 
     search(haystack, haystackName, haystackName, 0)
     return found
 
 def introspect(obj, **kw):
-    if type(obj) in dictTypes:
+    if type(obj) in dict_types:
         return DictIntrospector(obj, **kw)
-    if type(obj) in listTypes:
+    if type(obj) in list_types:
         return ListIntrospector(obj, **kw)
-    if type(obj) in instanceTypes:
+    if type(obj) in instance_types:
         return InstanceIntrospector(obj, **kw)
 
     # User objects
