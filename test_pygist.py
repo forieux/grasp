@@ -218,16 +218,6 @@ class AproposTest(unittest.TestCase):
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
-    # Sometimes causes bus error?
-    # @unittest.skipIf(test_cfg.patience < 1, "Not patient enough.")
-    def testModuleSearch(self):
-        # Sequester the long-running test.
-        lst = aproposName('aproposName', aproposModule)
-        self.assertTrue('apropos.aproposName' in lst)
-        self.assertTrue('apropos.aproposNameRegexp' in lst)
-        self.assertTrue('apropos.__builtins__[_ip].user_ns[aproposName]'
-                        in lst)
-
     def testSyntax(self):
         """Functionality has been tested... just make sure that these
         functions can be called"""
