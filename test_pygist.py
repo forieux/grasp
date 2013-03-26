@@ -1,5 +1,22 @@
-import unittest, tempfile
+## Find appropriate unittest module
+import unittest
+if not hasattr(unittest, 'skipIf'):
+    try: 
+        import unittest2 as unittest        
+    except ImportError:
+        raise NotImplementedError, \
+            """Tests require either the Python 2.7 or later version of unittest or
+            the unittest2 module."""
+
+import tempfile
 from pygist import *
+
+## Make it easy to skip long-running tests.  
+## 0 = tests instantaneous
+## 1 = test takes longer than 10 sec
+## 2 = test takes longer than 1 min
+## 3 = test takes longer than I'm willing to wait
+patience = 1
 
 class SyntaxTest(unittest.TestCase):
 
@@ -150,9 +167,8 @@ class AproposTest(unittest.TestCase):
     # Untested functions, but I think it's ok that way:
     # _apropos  apropos
 
+    # @unittest.skipIf(test_cfg.patience < 1, "Not patient enough.")
     def testAproposName(self):
-        if not TestConfig.slow:
-            return
         
         class Composite:
             def __init__(self):
@@ -197,8 +213,9 @@ class AproposTest(unittest.TestCase):
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
-    # TODO -- Sometimes causes bus error?
-    def disable_testModuleSearch(self):
+    # Sometimes causes bus error?
+    # @unittest.skipIf(test_cfg.patience < 1, "Not patient enough.")
+    def testModuleSearch(self):
         # Sequester the long-running test.
         lst = aproposName('aproposName', aproposModule)
         self.assertTrue('apropos.aproposName' in lst)
@@ -380,8 +397,14 @@ class AproposTest(unittest.TestCase):
                                          Composite(None)))
 
 def test():
-    suites = [unittest.TestLoader().loadTestsFromTestCase(test)
-              for test in (SyntaxTest, IntrospectionTest, AproposTest)]
-    suite = unittest.TestSuite(suites)
+    suite = unittest.defaultTestLoader.loadTestsFromName(__file__[:-3])
     unittest.TextTestRunner().run(suite)
+
+if type(__builtins__) is type({}):
+    names = __builtins__.keys()
+else:
+    names = dir(__builtins__)
+
+if __name__ == '__main__' and '__IPYTHON__' not in names:
+    test()
             
