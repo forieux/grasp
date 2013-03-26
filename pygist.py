@@ -118,63 +118,63 @@ instance_types = [types.InstanceType, types.ModuleType]
 ## Interface
 
 ## Common Usage
-def aproposName(needle, haystack=None, **kw):
+def apropos_name(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a
     substring of the name.  See apropos() for addtional keyword
-    arguments.  Typical usage is aproposName('string', module).
+    arguments.  Typical usage is apropos_name('string', module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchName, **kw)
+    return apropos(needle, haystack, searchFn=search_name, **kw)
 
-def aproposValue(needle, haystack=None, **kw):
+def apropos_value(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a
     substring the string representation of the object.  See apropos()
     for addtional keyword arguments.  Typical usage is
-    aproposValue('string', module).
+    apropos_value('string', module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchValue, **kw)
+    return apropos(needle, haystack, searchFn=search_value, **kw)
 
-def aproposDoc(needle, haystack=None, **kw):
+def apropos_doc(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a
     substring of the documentation string of the object.  See
     apropos() for addtional keyword arguments.  Typical usage is
-    aproposDoc('string', module).
+    apropos_doc('string', module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchDoc, **kw)
+    return apropos(needle, haystack, searchFn=search_doc, **kw)
 
-def aproposNameRegexp (needle, haystack=None, **kw):
+def apropos_name_regexp (needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
     matching the name.  See apropos() for addtional keyword arguments.
-    Typical usage is aproposNameRegexp('string', module).
+    Typical usage is apropos_name_regexp('string', module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchNameRegexp, **kw)
+    return apropos(needle, haystack, searchFn=search_name_regexp, **kw)
 
-def aproposValueRegexp(needle, haystack=None, **kw):
+def apropos_value_regexp(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
     matching the string representation of the object.  See apropos()
     for addtional keyword arguments.  Typical usage is
-    aproposValueRegexp('string', module).
+    apropos_value_regexp('string', module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchValueRegexp, **kw)
+    return apropos(needle, haystack, searchFn=search_value_regexp, **kw)
 
-def aproposDocRegexp(needle, haystack=None, **kw):
+def apropos_doc_regexp(needle, haystack=None, **kw):
     """Recursively search for attributes with where needle is a regexp
     matching the docstring of the object.  See apropos() for addtional
-    keyword arguments.  Typical usage is aproposDocRegexp('string',
+    keyword arguments.  Typical usage is apropos_doc_regexp('string',
     module).
 
     Return a list of strings showing the path to reach the matching
     object"""
-    return apropos(needle, haystack, searchFn=searchDocRegexp, **kw)
+    return apropos(needle, haystack, searchFn=search_doc_regexp, **kw)
 
 ## Handles default values of arguments
 def apropos(needle, haystack=None, name=None,
@@ -206,17 +206,17 @@ def apropos(needle, haystack=None, name=None,
         else:
             name = 'arg'
     
-    if searchFn is None: searchFn = searchName
+    if searchFn is None: searchFn = search_name
 
     return _apropos(needle, haystack, name, searchFn, **kw)
 
 ##################################################
 ## Common search functions
 
-def searchName(needle, name, obj):
+def search_name(needle, name, obj):
     return name and needle in name    
 
-def searchValue(needle, name, obj):
+def search_value(needle, name, obj):
     # String representation of dicts, lists, and tuples includes the
     # objects within them, so don't consider that to be a match on the
     # desired value.  Wait to get inside the container class...
@@ -228,19 +228,19 @@ def searchValue(needle, name, obj):
         return needle in str(obj)
 # NOTE -- should be repr()?
 
-def searchDoc(needle, name, obj):
+def search_doc(needle, name, obj):
     return hasattr(obj, '__doc__') and obj.__doc__ \
            and needle in obj.__doc__
     
-def searchNameRegexp(needle, name, obj):
+def search_name_regexp(needle, name, obj):
     return name and re.search(needle, name)
 
-def searchValueRegexp(needle, name, obj):
+def search_value_regexp(needle, name, obj):
     if type(obj) not in (types.TupleType, types.ListType,
                          types.DictType):
         return re.search(needle, str(obj))
 
-def searchDocRegexp(needle, name, obj):
+def search_doc_regexp(needle, name, obj):
     return hasattr(obj, '__doc__') \
            and obj.__doc__ \
            and re.search(needle, obj.__doc__)

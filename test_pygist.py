@@ -181,39 +181,39 @@ class AproposTest(unittest.TestCase):
                 self.a = 1
                 self.foo = 'bar'
                 self.b = 3
-        self.assertEqual(aproposName('foo', [1,'foo',2]),
+        self.assertEqual(apropos_name('foo', [1,'foo',2]),
                          [])
-        self.assertEqual(aproposName('foo', (1,'foo',3)),
+        self.assertEqual(apropos_name('foo', (1,'foo',3)),
                          [])
-        self.assertEqual(aproposName('foo', dict(a=1,foo='bar',b=3)),
+        self.assertEqual(apropos_name('foo', dict(a=1,foo='bar',b=3)),
                          ['arg[foo]'])
-        self.assertEqual(aproposName('foo', Composite()),
+        self.assertEqual(apropos_name('foo', Composite()),
                          ['arg.foo'])
 
-        lst = aproposName('aproposName', pygist)
-        self.assertTrue('pygist.aproposName' in lst)
-        self.assertTrue('pygist.aproposNameRegexp' in lst)
+        lst = apropos_name('apropos_name', pygist)
+        self.assertTrue('pygist.apropos_name' in lst)
+        self.assertTrue('pygist.apropos_name_regexp' in lst)
 
-        self.assertEqual(aproposName('foo', Composite(), name='name'),
+        self.assertEqual(apropos_name('foo', Composite(), name='name'),
                          ['name.foo'])
 
     def testMaxDepth(self):
-        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+        lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
                           maxDepth=0)
         self.assertFalse('arg][foo][foo]' in lst)
         self.assertFalse('arg][foo]' in lst)
 
-        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+        lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
                           maxDepth=1)
         self.assertFalse('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
-        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+        lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3),
                           maxDepth=2)
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
-        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3))
+        lst = apropos_name('foo', dict(foo=dict(foo=1, bar=2), b=3))
         self.assertTrue('arg[foo][foo]' in lst)
         self.assertTrue('arg[foo]' in lst)
 
@@ -224,18 +224,18 @@ class AproposTest(unittest.TestCase):
             def __init__(self, str):
                 self.__doc__ = str
 
-        self.assertEqual(aproposValue('foo', dict(a=1, bar='foo')),
+        self.assertEqual(apropos_value('foo', dict(a=1, bar='foo')),
                          ['arg[bar]'])
-        self.assertEqual(aproposDoc('foo', Composite('foo')),
+        self.assertEqual(apropos_doc('foo', Composite('foo')),
                          ['arg'])
-        self.assertEqual(aproposNameRegexp ('^foo', dict(foo=1, barfoo=2)),
+        self.assertEqual(apropos_name_regexp ('^foo', dict(foo=1, barfoo=2)),
                          ['arg[foo]'])
-        self.assertEqual(aproposValueRegexp ('^foo', dict(bar='foo',
+        self.assertEqual(apropos_value_regexp ('^foo', dict(bar='foo',
                                                           the='afoo')),
                          ['arg[bar]'])
-        self.assertEqual(aproposDocRegexp ('^foo', Composite('foo')),
+        self.assertEqual(apropos_doc_regexp ('^foo', Composite('foo')),
                          ['arg'])
-        self.assertEqual(aproposDocRegexp ('^foo', Composite('theFoo')),
+        self.assertEqual(apropos_doc_regexp ('^foo', Composite('theFoo')),
                          [])
             
     def testNullIntrospector(self):
@@ -293,12 +293,12 @@ class AproposTest(unittest.TestCase):
         self.assertFalse((2, '_b', '[_b]') in lst)            
 
     def testSearchName(self):
-        self.assertTrue(searchName('needle', 'the needle', None))
-        self.assertTrue(searchName('needle', 'needle more', None))
-        self.assertTrue(searchName('needle', 'the needle more', None))
+        self.assertTrue(search_name('needle', 'the needle', None))
+        self.assertTrue(search_name('needle', 'needle more', None))
+        self.assertTrue(search_name('needle', 'the needle more', None))
 
         # Make sure function doesn't freak out for no name
-        self.assertFalse(searchName('needle', None, None))
+        self.assertFalse(search_name('needle', None, None))
         
     def testSearchValue(self):
         class Composite:
@@ -309,19 +309,19 @@ class AproposTest(unittest.TestCase):
             def __str__(self):
                 return self._str
             
-        self.assertTrue(searchValue('needle', None,
+        self.assertTrue(search_value('needle', None,
                                     Composite('the needle')))
-        self.assertTrue(searchValue('needle', None,
+        self.assertTrue(search_value('needle', None,
                                     Composite('needle more')))
-        self.assertTrue(searchValue('needle', None,
+        self.assertTrue(search_value('needle', None,
                                     Composite('the needle more')))
-        # These are not true because searchValue doens't split
+        # These are not true because search_value doens't split
         # apart built-in containers
-        self.assertFalse(searchValue('needle', None,
+        self.assertFalse(search_value('needle', None,
                                     ['needle', 2, 3]))
-        self.assertFalse(searchValue('needle', None,
+        self.assertFalse(search_value('needle', None,
                                     ('needle', 2, 3)))
-        self.assertFalse(searchValue('needle', None,
+        self.assertFalse(search_value('needle', None,
                                     dict(a='needle', b=2, c=3)))
 
         
@@ -343,12 +343,12 @@ class AproposTest(unittest.TestCase):
 
         
     def testSearchNameRegexp(self):  
-        self.assertFalse(searchNameRegexp('^needle', 'the needle', None))
-        self.assertTrue(searchNameRegexp('^needle', 'needle more', None))
-        self.assertFalse(searchNameRegexp('^needle', 'the needle more', None))
+        self.assertFalse(search_name_regexp('^needle', 'the needle', None))
+        self.assertTrue(search_name_regexp('^needle', 'needle more', None))
+        self.assertFalse(search_name_regexp('^needle', 'the needle more', None))
 
         # Make sure function doesn't freak out for no name
-        self.assertFalse(searchName('^needle', None, None))
+        self.assertFalse(search_name('^needle', None, None))
 
     def testSearchValueRegexp(self): 
         class Composite:
@@ -359,19 +359,19 @@ class AproposTest(unittest.TestCase):
             def __str__(self):
                 return self._str
             
-        self.assertFalse(searchValueRegexp('^needle', None,
+        self.assertFalse(search_value_regexp('^needle', None,
                                            Composite('the needle')))
-        self.assertTrue(searchValueRegexp('^needle', None,
+        self.assertTrue(search_value_regexp('^needle', None,
                                           Composite('needle more')))
-        self.assertFalse(searchValueRegexp('^needle', None,
+        self.assertFalse(search_value_regexp('^needle', None,
                                            Composite('the needle more')))
 
         # Make sure we don't search inside containers
-        self.assertFalse(searchValueRegexp('needle', None,
+        self.assertFalse(search_value_regexp('needle', None,
                                            ['needle', 2, 3]))
-        self.assertFalse(searchValueRegexp('needle', None,
+        self.assertFalse(search_value_regexp('needle', None,
                                            ('needle', 2, 3)))
-        self.assertFalse(searchValueRegexp('needle', None,
+        self.assertFalse(search_value_regexp('needle', None,
                                            dict(a='needle', b=2, c=3)))
 
     def testSearchDocRegexp(self):   
