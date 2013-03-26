@@ -15,7 +15,8 @@ class sstr(object):
     def __repr__(self): return str(self._name)
     def __str__(self): return str(self._name)
 
-def every(args): return reduce(lambda x,y: x and y, args, True)
+def every(args): 
+    return reduce(lambda x,y: x and y, args, True)
 
 ##################################################
 ## Introspection
