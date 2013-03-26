@@ -1,0 +1,249 @@
+import unittest;
+
+import apropos as aproposModule
+from apropos import *
+from test_all import TestConfig
+
+class AproposTest(unittest.TestCase):
+    # Untested functions, but I think it's ok that way:
+    # _apropos  apropos
+
+    def testAproposName(self):
+        if not TestConfig.slow:
+            return
+        
+        class Composite:
+            def __init__(self):
+                self.a = 1
+                self.foo = 'bar'
+                self.b = 3
+        self.assertEqual(aproposName('foo', [1,'foo',2]),
+                         [])
+        self.assertEqual(aproposName('foo', (1,'foo',3)),
+                         [])
+        self.assertEqual(aproposName('foo', dict(a=1,foo='bar',b=3)),
+                         ['arg[foo]'])
+        self.assertEqual(aproposName('foo', Composite()),
+                         ['arg.foo'])
+
+        lst = aproposName('aproposName', aproposModule, exclude='_')
+        self.assertTrue('apropos.aproposName' in lst)
+        self.assertTrue('apropos.aproposNameRegexp' in lst)
+        self.assertFalse('apropos.__builtins__[_ip].user_ns[aproposName]'
+                         in lst)
+
+        self.assertEqual(aproposName('foo', Composite(), name='name'),
+                         ['name.foo'])
+
+    def testMaxDepth(self):
+        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+                          maxDepth=0)
+        self.assertFalse('arg][foo][foo]' in lst)
+        self.assertFalse('arg][foo]' in lst)
+
+        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+                          maxDepth=1)
+        self.assertFalse('arg[foo][foo]' in lst)
+        self.assertTrue('arg[foo]' in lst)
+
+        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3),
+                          maxDepth=2)
+        self.assertTrue('arg[foo][foo]' in lst)
+        self.assertTrue('arg[foo]' in lst)
+
+        lst = aproposName('foo', dict(foo=dict(foo=1, bar=2), b=3))
+        self.assertTrue('arg[foo][foo]' in lst)
+        self.assertTrue('arg[foo]' in lst)
+
+    # TODO -- Sometimes causes bus error?
+    def disable_testModuleSearch(self):
+        # Sequester the long-running test.
+        lst = aproposName('aproposName', aproposModule)
+        self.assertTrue('apropos.aproposName' in lst)
+        self.assertTrue('apropos.aproposNameRegexp' in lst)
+        self.assertTrue('apropos.__builtins__[_ip].user_ns[aproposName]'
+                        in lst)
+
+    def testSyntax(self):
+        """Functionality has been tested... just make sure that these
+        functions can be called"""
+        class Composite:
+            def __init__(self, str):
+                self.__doc__ = str
+
+        self.assertEqual(aproposValue('foo', dict(a=1, bar='foo')),
+                         ['arg[bar]'])
+        self.assertEqual(aproposDoc('foo', Composite('foo')),
+                         ['arg'])
+        self.assertEqual(aproposNameRegexp ('^foo', dict(foo=1, barfoo=2)),
+                         ['arg[foo]'])
+        self.assertEqual(aproposValueRegexp ('^foo', dict(bar='foo',
+                                                          the='afoo')),
+                         ['arg[bar]'])
+        self.assertEqual(aproposDocRegexp ('^foo', Composite('foo')),
+                         ['arg'])
+        self.assertEqual(aproposDocRegexp ('^foo', Composite('theFoo')),
+                         [])
+            
+    def testNullIntrospector(self):
+        i = NullIntrospector()
+        # I think this is how this is supposed to work
+        self.assertEqual(id(i), id(i.__iter__()))
+        self.assertRaises(StopIteration, i.next)
+
+        # make sure code doens't freak out
+        i = NullIntrospector(exclude='_')
+
+    def testListIntrospector(self):
+        i = ListIntrospector([1,2])
+        self.assertEqual(id(i), id(i.__iter__()))
+        self.assertEqual(i.next(), (1, None, '[0]'))
+        self.assertEqual(i.next(), (2, None, '[1]'))
+        self.assertRaises(StopIteration, i.next)
+
+        # make sure code doens't freak out
+        i = ListIntrospector([1,2], exclude='_')
+
+    def testInstanceIntrospector(self):
+        class Composite:
+            pass
+
+        c = Composite()
+        c.a = 1
+        c.b = 2
+
+        lst = [el for el in InstanceIntrospector(c)]
+        # depending on how I'm running the test, one or the other of
+        # these should be in the list
+        self.assertTrue(('test_apropos', '__module__', '.__module__') in lst
+                        or ('__builtin__', '__module__', '.__module__') in lst)
+        self.assertTrue((None, '__doc__', '.__doc__') in lst)
+        self.assertTrue((1, 'a', '.a') in lst)
+        self.assertTrue((2, 'b', '.b') in lst)
+        self.assertEqual(len(lst), 4)
+
+        lst = [el for el in InstanceIntrospector(c, exclude='_')]
+        self.assertFalse(() in lst)
+        self.assertFalse((None, None, '.__doc__') in lst)
+        self.assertEqual(len(lst), 2)
+
+    def testDictIntrospector(self):
+        lst = [el for el in DictIntrospector(dict(a=1,_b=2))]
+
+        self.assertEqual(len(lst), 2)
+        self.assertTrue((1, 'a', '[a]') in lst)
+        self.assertTrue((2, '_b', '[_b]') in lst)
+
+        lst = [el for el in DictIntrospector(dict(a=1,_b=2), exclude='_')]
+        self.assertEqual(len(lst), 1)
+        self.assertTrue((1, 'a', '[a]') in lst)
+        self.assertFalse((2, '_b', '[_b]') in lst)            
+
+    def testSearchName(self):
+        self.assertTrue(searchName('needle', 'the needle', None))
+        self.assertTrue(searchName('needle', 'needle more', None))
+        self.assertTrue(searchName('needle', 'the needle more', None))
+
+        # Make sure function doesn't freak out for no name
+        self.assertFalse(searchName('needle', None, None))
+        
+    def testSearchValue(self):
+        class Composite:
+            def __init__(self, str):
+                self._str = str
+            def __repr__(self):
+                return self._str
+            def __str__(self):
+                return self._str
+            
+        self.assertTrue(searchValue('needle', None,
+                                    Composite('the needle')))
+        self.assertTrue(searchValue('needle', None,
+                                    Composite('needle more')))
+        self.assertTrue(searchValue('needle', None,
+                                    Composite('the needle more')))
+        # These are not true because searchValue doens't split
+        # apart built-in containers
+        self.assertFalse(searchValue('needle', None,
+                                    ['needle', 2, 3]))
+        self.assertFalse(searchValue('needle', None,
+                                    ('needle', 2, 3)))
+        self.assertFalse(searchValue('needle', None,
+                                    dict(a='needle', b=2, c=3)))
+
+        
+    def testSearchDoc(self):   
+        class Composite:
+            def __init__(self, str):
+                self.__doc__ = str
+
+        self.assertTrue(searchDoc('needle', None,
+                                  Composite('the needle')))
+        self.assertTrue(searchDoc('needle', None,
+                                  Composite('needle more')))
+        self.assertTrue(searchDoc('needle', None,
+                                  Composite('the needle more')))
+
+        # Make sure search fn doesn't freak out
+        self.assertFalse(searchDoc('needle', None,
+                                   Composite(None)))
+
+        
+    def testSearchNameRegexp(self):  
+        self.assertFalse(searchNameRegexp('^needle', 'the needle', None))
+        self.assertTrue(searchNameRegexp('^needle', 'needle more', None))
+        self.assertFalse(searchNameRegexp('^needle', 'the needle more', None))
+
+        # Make sure function doesn't freak out for no name
+        self.assertFalse(searchName('^needle', None, None))
+
+    def testSearchValueRegexp(self): 
+        class Composite:
+            def __init__(self, str):
+                self._str = str
+            def __repr__(self):
+                return self._str
+            def __str__(self):
+                return self._str
+            
+        self.assertFalse(searchValueRegexp('^needle', None,
+                                           Composite('the needle')))
+        self.assertTrue(searchValueRegexp('^needle', None,
+                                          Composite('needle more')))
+        self.assertFalse(searchValueRegexp('^needle', None,
+                                           Composite('the needle more')))
+
+        # Make sure we don't search inside containers
+        self.assertFalse(searchValueRegexp('needle', None,
+                                           ['needle', 2, 3]))
+        self.assertFalse(searchValueRegexp('needle', None,
+                                           ('needle', 2, 3)))
+        self.assertFalse(searchValueRegexp('needle', None,
+                                           dict(a='needle', b=2, c=3)))
+
+    def testSearchDocRegexp(self):   
+        class Composite:
+            def __init__(self, str):
+                self.__doc__ = str
+
+        self.assertFalse(searchDocRegexp('^needle', None,
+                                         Composite('the needle')))
+        self.assertTrue(searchDocRegexp('^needle', None,
+                                        Composite('needle more')))
+        self.assertFalse(searchDocRegexp('^needle', None,
+                                         Composite('the needle more')))
+
+        # Make sure function doesn't freak out if no doc
+        self.assertFalse(searchDocRegexp('^needle', None,
+                                         Composite(None)))
+        
+def suite():
+    suites = [unittest.TestLoader().loadTestsFromTestCase(test)
+              for test in (AproposTest,)]
+    return unittest.TestSuite(suites)
+
+def test():
+    unittest.TextTestRunner().run(suite())
+
+def itest():
+    suite().debug()
