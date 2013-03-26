@@ -25,27 +25,26 @@ recursive_type_composite_types = [list, tuple, dict, set, frozenset, numpy.ndarr
 
 # For apropos searches.
 #
-# You can add your own types to these lists if you want apropos to
+# You can add your own types to the lists below if you want apropos to
 # descend into them.  If you have a container that you want apropos to
 # search, but it doesn't respond appropriately to the methods listed
 # below, you can give it a function called __apropos__.  This function
 # takes no arguments and should return an iterator.  The iterator
 # should return the contents of the object, as tuples of
 # (element_object, name_string, access_string)
+#
+# Types in dict_types must respond to __iter__ and [string].  Designed
+# for things you access via [string]
+# 
+# Types in list_types must respond to __iter__().  Designed for things
+# you access via [int]
+# 
+# Types in instance_types must give sensible results to dir(),
+# getattr().  Designed for things you access via .
 
-# Must respond to __iter__ and [string].  Designed for things you
-# access via [string]
-dict_types = [types.DictType]
-# Must respond to __iter__().  Designed for things you access via
-# [int]
-# TODO -- bytearray and memoryview, not sure why they're not showing
-# up in types module.  They look like python builtins
-list_types = [types.ListType, types.TupleType]
-# Must give sensible results to dir(), getattr().  Designed for things
-# you access via .
-instance_types = [types.InstanceType, types.ModuleType]
-# Not sure what to do with memoryview.  Looks like an array but doens't have iter
-# memoryview
+apropos_dict_types = [types.DictType]
+apropos_list_types = [types.ListType, types.TupleType]
+apropos_instance_types = [types.InstanceType, types.ModuleType]
 
 class sstr(object):
     """Simple String.  Used for pretty output in IPython (no quotes)."""
@@ -289,17 +288,17 @@ def _apropos(needle, haystack, haystack_name,
 
     searched_ids = []
     found = []
-    search_types = dict_types + list_types + instance_types
+    search_types = apropos_dict_types + apropos_list_types + apropos_instance_types
 
     search_internal(haystack, haystack_name, haystack_name, 0)
     return found
 
 def introspect(obj, **kw):
-    if type(obj) in dict_types:
+    if type(obj) in apropos_dict_types:
         return DictIntrospector(obj, **kw)
-    if type(obj) in list_types:
+    if type(obj) in apropos_list_types:
         return ListIntrospector(obj, **kw)
-    if type(obj) in instance_types:
+    if type(obj) in apropos_instance_types:
         return InstanceIntrospector(obj, **kw)
 
     # User objects
