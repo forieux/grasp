@@ -382,7 +382,6 @@ class AproposTest(unittest.TestCase):
 def test():
     suites = [unittest.TestLoader().loadTestsFromTestCase(test)
               for test in (SyntaxTest, IntrospectionTest, AproposTest)]
-    return unittest.TestSuite(suites)
-
-    unittest.TextTestRunner().run(suite())
+    suite = unittest.TestSuite(suites)
+    unittest.TextTestRunner().run(suite)
             
