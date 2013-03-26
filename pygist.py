@@ -7,7 +7,7 @@ import types, re
 import numpy
 
 __version__ = 0.2
-__author__ = "Greg Novak <novak@ucolick.org"
+__author__ = "Greg Novak <greg.novak@gmail.com>"
 
 class sstr(object):
     """Simple String.  Used for pretty output in IPython (no quotes)."""
