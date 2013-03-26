@@ -104,10 +104,14 @@ def rtype(obj, max=50):
 dictTypes = [types.DictType]
 # Must respond to __iter__().  Designed for things you access via
 # [int]
+# TODO -- bytearray and memoryview, not sure why they're not showing
+# up in types module.  They look like python builtins
 listTypes = [types.ListType, types.TupleType]
 # Must give sensible results to dir(), getattr().  Designed for things
 # you access via .
 instanceTypes = [types.InstanceType, types.ModuleType]
+# Not sure what to do with memoryview.  Looks like an array but doens't have iter
+# memoryview
 
 ##################################################
 ## Interface

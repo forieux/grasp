@@ -47,7 +47,12 @@ class IntrospectionTest(unittest.TestCase):
                          types.GetSetDescriptorType,
                          types.MemberDescriptorType,
                          types.NotImplementedType,
-                         types.TracebackType,]
+                         types.TracebackType,
+                         # Not sure why this isn't showing up under exceptions
+
+                         GeneratorExit,
+                         # TODO -- do these belong here?
+                         bytearray, memoryview]
 
         # These are the ones in types module
         self.objs = [True, # Boolean,
