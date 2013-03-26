@@ -278,8 +278,13 @@ def _apropos(needle, haystack, haystack_name,
     def search_internal(haystack, haystack_name, full_name, depth):
         '''Free variable: needle, search_types'''
         # print "Searched", len(searched_ids), "Searching", depth, full_name
-        if search(needle, haystack_name, haystack):
-            found.append(full_name)
+        # TODO -- figure out WTF is going on with unicode strings here.
+        # for now, just skip them.
+        try: 
+            if search(needle, haystack_name, haystack):
+                found.append(full_name)
+        except UnicodeDecodeError:
+            print "String problems at", full_name
 
         # break apart if obj is not already searched
         if type(haystack) in search_types \
