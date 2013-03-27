@@ -15,26 +15,6 @@ try: import magic
 except: pass
 
 ##################################################
-# Information about types for recursive_types() function.
-##################################################
-recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
-                               types.NoneType]
-
-if numpy: 
-    recursive_type_simple_types += [numpy.bool8,
-            numpy.complex64, numpy.complex128, numpy.float32, numpy.float64,
-            numpy.int0, numpy.int8, numpy.int16,  numpy.int32, numpy.int64,
-            numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
-    
-    if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
-        recursive_type_simple_types += [numpy.float128, numpy.complex256]
-        
-recursive_type_composite_types = [list, tuple, dict, set, frozenset]
-
-if numpy:
-    recursive_type_composite_types += [numpy.ndarray]
-
-##################################################
 # Information about types for apropos searches.
 ##################################################
 #
@@ -58,6 +38,26 @@ if numpy:
 apropos_dict_types = [types.DictType]
 apropos_list_types = [types.ListType, types.TupleType]
 apropos_instance_types = [types.InstanceType, types.ModuleType]
+
+##################################################
+# Information about types for recursive_types() function.
+##################################################
+recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
+                               types.NoneType]
+
+if numpy: 
+    recursive_type_simple_types += [numpy.bool8,
+            numpy.complex64, numpy.complex128, numpy.float32, numpy.float64,
+            numpy.int0, numpy.int8, numpy.int16,  numpy.int32, numpy.int64,
+            numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+    
+    if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
+        recursive_type_simple_types += [numpy.float128, numpy.complex256]
+        
+recursive_type_composite_types = [list, tuple, dict, set, frozenset]
+
+if numpy:
+    recursive_type_composite_types += [numpy.ndarray]
 
 ##############################
 ## Utilities.
