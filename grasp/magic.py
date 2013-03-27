@@ -55,7 +55,7 @@ Using the one from the user's namespace."""
     
     @IPython.core.magic.line_magic
     def apropos(self, line):
-        """%apname [-d <max_depth>] [-s <search_function>] <needle> [haystack]
+        """%apropos [-d <max_depth>] [-s <search_function>] <needle> [haystack]
 
         Search for things related to "needle."  Return a list of
         matching names.
@@ -216,7 +216,11 @@ class IntrospectionMagics(IPython.core.magic.Magics):
         # want it for the magic command, so don't advertise it:
         # -u : 'ugly' output with standard strings (lots of extra quotes)
         opts, arg = self.parse_options(line, 'vu')
-        return grasp.gist(self.shell.user_ns[arg], 
+        if arg in self.shell.user_ns:
+            obj = self.shell.user_ns[arg]
+        else:
+            obj = eval(arg, self.shell.user_ns)
+        return grasp.gist(obj, 
                           verbose='v' in opts, 
                           pretty='u' not in opts)
 
