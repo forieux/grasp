@@ -27,19 +27,19 @@ class AproposMagics(IPython.core.magic.Magics):
         # function anyway.
         if 's' in opts:
             # search is either the name of a function in the user's
-            # namespace, the name of a function in this module's
+            # namespace, the name of a function in the grasp module's
             # namepsace, or else an anonymous function.
             in_user_ns = (opts['s'] in self.shell.user_ns 
                           and callable(self.shell.user_ns[opts['s']]))
-            in_module_ns = (opts['s'] in globals()
-                            and callable(globals()[opts['s']]))
+            in_module_ns = (hasattr(grasp, opts['s'])
+                            and callable(getattr(grasp, opts['s'])))
             if in_user_ns and in_module_ns:
                 print """Found search functions in user namespace and module namespace.
 Using the one from the user's namespace."""
             if in_user_ns:
                 kw['search'] = self.shell.user_ns[opts['s']]
             elif in_module_ns:
-                kw['search'] = globals()[opts['s']]
+                kw['search'] = getattr(grasp, opts['s'])
             else:
                 kw['search'] = eval(opts['s'])
             
