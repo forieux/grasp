@@ -399,17 +399,6 @@ class Introspector (object):
     def next(self):
         pass
 
-class NullIntrospector (Introspector):
-    """Object for the case where it's not known how to iterate over the
-    given object.
-
-    """
-    def __init__(self, **kw):
-        pass
-
-    def next(self):
-        raise StopIteration
-
 class DictIntrospector (Introspector):
     """Object that can iterate over the contents of a dict"""
     # types that respond to __iter__, obj.[key] to get a value
@@ -462,6 +451,17 @@ class InstanceIntrospector (Introspector):
               or (self.exclude and name.startswith(self.exclude)):
             name = self.iter.next()
         return getattr(self.inst, name), name, "." + name
+
+class NullIntrospector (Introspector):
+    """Object for the case where it's not known how to iterate over the
+    given object.
+
+    """
+    def __init__(self, **kw):
+        pass
+
+    def next(self):
+        raise StopIteration
 
 ## End of apropos implementation guts.
 ##################################################
