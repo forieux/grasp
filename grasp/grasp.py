@@ -103,9 +103,13 @@ def gist(obj, verbose=False, pretty=True):
             info.append((name, type(attr)))
 
     types = sorted(set([el[1] for el in info]))
+    # TODO result used to be a list, not a dict.  Do I prefer that
+    # since I'll have deterministic ordering in printouts?  Might make
+    # programmatic processing of output worse, but I don't do that
+    # anyway and I can always just pass the list to a dict.
     result = {}
-    for t in types:
-        names = [string(name) for name, the_type in info if the_type is t]        
+    for tt in types:
+        names = [string(name) for name, the_type in info if the_type is tt]        
         result[string(t.__name__)] = names
         #result.append((t.__name__, names))
     return result
@@ -131,19 +135,25 @@ def recursive_type(obj, max=50):
 
     """
     def rtypes_equal(els):
+        """Return True if all rtypes equal"""
         first_type = recursive_type(els[0])
         return every([ recursive_type(el) == first_type for el in els])
     def types_equal(els):
+        """Return True if all types equal"""
         first_type = type(els[0])
         return every([ type(el) is first_type for el in els])
     def types_simple(els):
+        """Return True if all types simple"""
         return every([ type(el) in recursive_type_simple_types for el in els])
     def name(obj):
+        """Return the name of obj"""
         return type(obj).__name__
     def shape(obj):
+        """Return the shape of obj"""
         if numpy and type(obj) is numpy.ndarray: return str(obj.shape)
         return str(len(obj))
     def contents(obj):
+        """Return an iterable object with the contents of obj"""
         if   type(obj) in (list, tuple): return obj
         elif type(obj) in (set, frozenset): return list(obj)
         elif type(obj) is dict: return [obj[k] for k in sorted(obj.keys())]
@@ -152,9 +162,11 @@ def recursive_type(obj, max=50):
     
     if type(obj) in recursive_type_composite_types:
         if types_equal(contents(obj)) and types_simple(contents(obj)):
-            return '%s of %s %s' % (name(obj), shape(obj), name(contents(obj)[0]))
+            return ('%s of %s %s' % 
+                    (name(obj), shape(obj), name(contents(obj)[0])))
         elif rtypes_equal(contents(obj)):
-            return ['%s of %s' % (name(obj), shape(obj)), recursive_type(contents(obj)[0])]
+            return ['%s of %s' % 
+                    (name(obj), shape(obj)), recursive_type(contents(obj)[0])]
         elif len(contents(obj)) > max:
             return ['%s of' % name(obj)] \
                    + [recursive_type(el) for el in contents(obj) [:max] ] \
@@ -192,6 +204,9 @@ def apropos(needle, haystack=None, name=None,
 
     """
     if haystack is None:
+        # TODO Think this is wrong.  Want call to globals to be from user's
+        # namespace, not the module space here.  Is there a way to
+        # climb up the call stack and steal it from them?  Probably...
         haystack = globals()
         name = ''
     elif name is None:
@@ -221,7 +236,7 @@ def search_value(needle, name, obj):
     if type(obj) not in (types.TupleType, types.ListType,
                          types.DictType):
         return needle in str(obj)
-# NOTE -- should be repr()?
+        # NOTE -- should be repr() above?
 
 def search_doc(needle, name, obj):
     """Match if needle is contained in the docstring of obj"""
@@ -341,7 +356,6 @@ def _apropos(needle, haystack, haystack_name,
     """
     def search_internal(haystack, haystack_name, full_name, depth):
         '''Free variable: needle, search_types'''
-        # print "Searched", len(searched_ids), "Searching", depth, full_name
         # TODO -- figure out WTF is going on with unicode strings here.
         # for now, just skip them.
         try: 
@@ -445,8 +459,9 @@ class InstanceIntrospector (Introspector):
         # IPython structs allow non-string attributes.  Filter them
         # out because they cause problems.  That is, you have to
         # access them via obj[1], not getattr(obj, 1) or
-        # getattr(obj, '1')    
-        # TODO -- 11filter out non-string things that appear in dir()
+        # getattr(obj, '1').  
+        # TODO -- could handle the above w/ use of eval
+        # TODO -- filter out non-string things that appear in dir()
 
         name = self.iter.next()
         while type(name) is not types.StringType \
