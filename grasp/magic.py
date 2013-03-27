@@ -261,7 +261,7 @@ class IntrospectionMagics(IPython.core.magic.Magics):
         if arg in self.shell.user_ns:
             obj = self.shell.user_ns[arg]
         else:
-            obj = eval(line)            
+            obj = eval(line, self.shell.user_ns)
         return grasp.recursive_type(obj, **kw)
 
 @IPython.core.magic.magics_class
