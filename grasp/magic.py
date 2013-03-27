@@ -1,4 +1,5 @@
 import IPython
+import grasp
 
 ##############################
 ## Provide IPython magic commands
@@ -46,37 +47,37 @@ Using the one from the user's namespace."""
     @IPython.core.magic.line_magic
     def apropos(self, line):
         aa, kw = self.parse_apropos_args(line)
-        return apropos(*aa, **kw)
+        return grasp.apropos(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apname(self, line):
         aa, kw = self.parse_apropos_args(line)
-        return apropos_name(*aa, **kw)
+        return grasp.apropos_name(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apname_regex(line):
         aa, kw = self.parse_apropos_args(line)
-        apropos_name_regexp(*aa, **kw)
+        grasp.apropos_name_regexp(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apvalue(line):
         aa, kw = self.parse_apropos_args(line)
-        apropos_value(*aa, **kw)
+        grasp.apropos_value(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apvalue_regex(line):
         aa, kw = self.parse_apropos_args(line)
-        apropos_value_regexp(*aa, **kw)
+        grasp.apropos_value_regexp(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apdoc(line):
         aa, kw = self.parse_apropos_args(line)
-        apropos_doc(*aa, **kw)
+        grasp.apropos_doc(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apdoc_regex(line):
         aa, kw = self.parse_apropos_args(line)
-        apropos_doc_regexp(*aa, **kw)
+        grasp.apropos_doc_regexp(*aa, **kw)
 
 @IPython.core.magic.magics_class
 class IntrospectionMagics(IPython.core.magic.Magics):
@@ -86,9 +87,9 @@ class IntrospectionMagics(IPython.core.magic.Magics):
 leading underscore.  -u => 'ugly' output with standard strings (lots
 of extra quotes)"""
         opts, arg = self.parse_options(line, 'vu')
-        return gist(self.shell.user_ns[arg], 
-                    verbose='v' in opts, 
-                    pretty='u' not in opts)
+        return grasp.gist(self.shell.user_ns[arg], 
+                          verbose='v' in opts, 
+                          pretty='u' not in opts)
 
     @IPython.core.magic.line_magic
     def rtype(self, line):
@@ -103,7 +104,7 @@ array/tuple/list to inspect."""
             obj = self.shell.user_ns[arg]
         else:
             obj = eval(line)            
-        return recursive_type(obj, **kw)
+        return grasp.recursive_type(obj, **kw)
 
 # deepreloads of IPython cause a crash, so add it to the list of
 # excludes for deep reloads
