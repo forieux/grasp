@@ -6,24 +6,25 @@
 
 import types, re
 
-# Optionally handle numpy types
+# Handle numpy types if numpy is available.
 try: import numpy
 except ImportError: numpy = False
 
-# Try to register IPython magic commands, but don't complain if this fails.
+# Try to register IPython magic commands if IPython is available
 try: import magic
 except: pass
 
-# For recursive_types
+##################################################
+# Information about types for recursive_types() function.
+##################################################
 recursive_type_simple_types = [bool, complex, float, int, long, str, unicode,
                                types.NoneType]
 
 if numpy: 
     recursive_type_simple_types += [numpy.bool8,
-                                    numpy.complex64, numpy.complex128,
-                                    numpy.float32, numpy.float64,
-                                    numpy.int0, numpy.int8, numpy.int16, numpy.int32, numpy.int64,
-                                    numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
+            numpy.complex64, numpy.complex128, numpy.float32, numpy.float64,
+            numpy.int0, numpy.int8, numpy.int16,  numpy.int32, numpy.int64,
+            numpy.uint0, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64]
     
     if hasattr(numpy, 'float128') and hasattr(numpy, 'complex256'):
         recursive_type_simple_types += [numpy.float128, numpy.complex256]
@@ -33,7 +34,9 @@ recursive_type_composite_types = [list, tuple, dict, set, frozenset]
 if numpy:
     recursive_type_composite_types += [numpy.ndarray]
 
-# For apropos searches.
+##################################################
+# Information about types for apropos searches.
+##################################################
 #
 # You can add your own types to the lists below if you want apropos to
 # descend into them.  If you have a container that you want apropos to
@@ -56,6 +59,8 @@ apropos_dict_types = [types.DictType]
 apropos_list_types = [types.ListType, types.TupleType]
 apropos_instance_types = [types.InstanceType, types.ModuleType]
 
+##############################
+## Utilities.
 class sstr(object):
     """Simple String.  Used for pretty output in IPython (no quotes)."""
     def __init__(self, name): self._name = name        
@@ -63,14 +68,28 @@ class sstr(object):
     def __str__(self): return str(self._name)
 
 def every(args): 
+    """Return True if all elements of args are True."""
     return reduce(lambda x,y: x and y, args, True)
 
 ##################################################
 ## Introspection
+##################################################
 def gist(obj, verbose=False, pretty=True):
     """See what an object is all about.  Make a dict where the keys
     are the names of each type of attribute in the object.  The values
-    are a list of the names of the attribute of that type."""
+    are a list of the names of the attribute of that type.
+
+    gist((1,2,3))
+    Out: {builtin_function_or_method: [count, index]}
+
+    gist(numpy.array([1,2,3]))
+    Out: {buffer: [data],
+      int: [itemsize, nbytes, ndim, size],
+      builtin_function_or_method: [all, any, argmax]
+      tuple: [shape, strides],
+      ndarray: [T, imag, real]}
+
+    """
     if pretty: string = sstr
     else: string = str
 
@@ -90,8 +109,25 @@ def gist(obj, verbose=False, pretty=True):
     return result
 
 def recursive_type(obj, max=50):
-    """Recursive type() function.  Try to give a concise description
-    of the type of an object and all objects it contains."""
+    """Recursive type() function.  Try to give a concise description of
+    the type of an object and all objects it contains.
+
+    recursive_type(1) 
+    'int'
+
+    recursive_type((1, 1.1, 2))
+    ['tuple of', 'int', 'float', 'int']
+
+    recursive_type((1, 2, 3))
+    'tuple of 3 int'
+
+    recursive_type(([1,2], [3,4], [5,6]))
+    ['tuple of 3', 'list of 2 int']
+
+    recursive_type((numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])))
+    ['tuple of 3', 'ndarray of (2,) int64']
+
+    """
     def rtypes_equal(els):
         first_type = recursive_type(els[0])
         return every([ recursive_type(el) == first_type for el in els])
@@ -127,36 +163,45 @@ def recursive_type(obj, max=50):
     return name(obj)
 
 ##################################################
-## Interface
+## Apropos: searching for things
+##################################################
 
-## Common Usage
+##############################
+## Apropos interface: commonly use cases with convenient syntax
+
 def apropos_name(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a
-    substring of the name.  See apropos() for addtional keyword
-    arguments.  Typical usage is apropos_name('string', module).
+    """Recursively search for attributes with where needle is a substring
+    of the name.  See apropos() for addtional keyword arguments.
+    Typical usage is apropos_name('string', module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_name, **kw)
 
 def apropos_value(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a
-    substring the string representation of the object.  See apropos()
-    for addtional keyword arguments.  Typical usage is
+    """Recursively search for attributes with where needle is a substring
+    the string representation of the object.  See apropos() for
+    addtional keyword arguments.  Typical usage is
     apropos_value('string', module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_value, **kw)
 
 def apropos_doc(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a
-    substring of the documentation string of the object.  See
-    apropos() for addtional keyword arguments.  Typical usage is
+    """Recursively search for attributes with where needle is a substring
+    of the documentation string of the object.  See apropos() for
+    addtional keyword arguments.  Typical usage is
     apropos_doc('string', module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_doc, **kw)
 
 def apropos_name_regexp (needle, haystack=None, **kw):
@@ -165,7 +210,9 @@ def apropos_name_regexp (needle, haystack=None, **kw):
     Typical usage is apropos_name_regexp('string', module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_name_regexp, **kw)
 
 def apropos_value_regexp(needle, haystack=None, **kw):
@@ -175,7 +222,9 @@ def apropos_value_regexp(needle, haystack=None, **kw):
     apropos_value_regexp('string', module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_value_regexp, **kw)
 
 def apropos_doc_regexp(needle, haystack=None, **kw):
@@ -185,14 +234,17 @@ def apropos_doc_regexp(needle, haystack=None, **kw):
     module).
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     return apropos(needle, haystack, search=search_doc_regexp, **kw)
 
-## Handles default values of arguments
+##############################
+## Main apropos interface function.
 def apropos(needle, haystack=None, name=None,
             search=None, **kw):
-    """Recursively search through haystack looking for needle.
-    Typical usage is apropos('string', module).
+    """Recursively search through haystack looking for needle.  Typical
+    usage is apropos('string', module).
     
     haystack can be any python object.  Typically it's a module.  If
     it's not given, it's the dict returned by globals() (ie, watch
@@ -202,13 +254,14 @@ def apropos(needle, haystack=None, name=None,
     'accessor' strings that are returned.  If not specified, defaults
     to 'arg'.
     
-    Matches determined by search.  search(needle, name, obj)
-    returns true if the object should be considered a match.  By
-    default, search matches if needle is a substring of the name of
-    the object.
+    Matches determined by search.  search(needle, name, obj) returns
+    true if the object should be considered a match.  By default,
+    search matches if needle is a substring of the name of the object.
 
     Return a list of strings showing the path to reach the matching
-    object"""
+    object
+
+    """
     if haystack is None:
         haystack = globals()
         name = ''
@@ -222,13 +275,14 @@ def apropos(needle, haystack=None, name=None,
 
     return _apropos(needle, haystack, name, search, **kw)
 
-##################################################
-## Common search functions
-
+##############################
+## Common apropos search functions
 def search_name(needle, name, obj):
+    """Match if needle is contained in name"""
     return name and needle in name    
 
 def search_value(needle, name, obj):
+    """Match if needle is contained in the string representation of obj"""
     # String representation of dicts, lists, and tuples includes the
     # objects within them, so don't consider that to be a match on the
     # desired value.  Wait to get inside the container class...
@@ -241,25 +295,28 @@ def search_value(needle, name, obj):
 # NOTE -- should be repr()?
 
 def search_doc(needle, name, obj):
+    """Match if needle is contained in the docstring of obj"""
     return hasattr(obj, '__doc__') and obj.__doc__ \
            and needle in obj.__doc__
     
 def search_name_regexp(needle, name, obj):
+    """Match if regexp needle matches name"""
     return name and re.search(needle, name)
 
 def search_value_regexp(needle, name, obj):
+    """Match if regexp needle matches the string representation of obj"""
     if type(obj) not in (types.TupleType, types.ListType,
                          types.DictType):
         return re.search(needle, str(obj))
 
 def search_doc_regexp(needle, name, obj):
+    """Match if regexp needle matches the docstring of obj"""
     return hasattr(obj, '__doc__') \
            and obj.__doc__ \
            and re.search(needle, obj.__doc__)
 
 ##################################################
-## The guts
-
+## Apropos implementation guts.
 def _apropos(needle, haystack, haystack_name,
              search, max_depth=None, **kw):
     """Recursively search through haystack looking for needle.
@@ -268,17 +325,18 @@ def _apropos(needle, haystack, haystack_name,
     it's not given, it's the dict returned by globals() (ie, watch
     out, it's going to take a while).
     
-    Matches determined by search.  search(needle, name, obj)
-    returns true if the object should be considered a match.  By
-    default, search matches if needle is a substring of the name of
-    the object.  
+    Matches determined by search.  search(needle, name, obj) returns
+    true if the object should be considered a match.  By default,
+    search matches if needle is a substring of the name of the object.
 
     name is the name of the top level object.  It's first bit of the
     'accessor' strings that are returned.  If not specified, defaults
     to 'arg'.
 
     Return a list of strings showing the path to reach the matching
-    object."""
+    object.
+
+    """
     def search_internal(haystack, haystack_name, full_name, depth):
         '''Free variable: needle, search_types'''
         # print "Searched", len(searched_ids), "Searching", depth, full_name
@@ -312,6 +370,10 @@ def _apropos(needle, haystack, haystack_name,
     return found
 
 def introspect(obj, **kw):
+    """Return an object that's capable of iterating over the contents of
+    obj
+
+    """
     if type(obj) in apropos_dict_types:
         return DictIntrospector(obj, **kw)
     if type(obj) in apropos_list_types:
@@ -330,6 +392,7 @@ def introspect(obj, **kw):
 # NOTE These introspectors simplify the code, but they seem to take about five
 # times as long, very unfortunately.
 class Introspector (object):
+    """Object that implements the iterator interface"""
     def __iter__(self):
         return self
 
@@ -337,6 +400,10 @@ class Introspector (object):
         pass
 
 class NullIntrospector (Introspector):
+    """Object for the case where it's not known how to iterate over the
+    given object.
+
+    """
     def __init__(self, **kw):
         pass
 
@@ -344,6 +411,7 @@ class NullIntrospector (Introspector):
         raise StopIteration
 
 class DictIntrospector (Introspector):
+    """Object that can iterate over the contents of a dict"""
     # types that respond to __iter__, obj.[key] to get a value
     def __init__(self, dict, exclude=None):
         self.dict = dict
@@ -360,6 +428,7 @@ class DictIntrospector (Introspector):
         return self.dict[k], k, '[' + k + ']'
 
 class ListIntrospector (Introspector):
+    """Object that can iterate over the contents of a list"""
     # types that respond to __iter__
     def __init__(self, list, exclude=None):
         self.list = list
@@ -372,6 +441,7 @@ class ListIntrospector (Introspector):
         return self.iter.next(), None, '[' + str(self.i-1) + ']'
 
 class InstanceIntrospector (Introspector):
+    """Object that can iterate over the contents of a instance"""
     # classes that respond to dir and getattr
     def __init__(self, inst, exclude=None):
         self.inst = inst
@@ -393,3 +463,5 @@ class InstanceIntrospector (Introspector):
             name = self.iter.next()
         return getattr(self.inst, name), name, "." + name
 
+## End of apropos implementation guts.
+##################################################
