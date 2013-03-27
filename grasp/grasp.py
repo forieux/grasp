@@ -79,11 +79,11 @@ def gist(obj, verbose=False, pretty=True):
     are the names of each type of attribute in the object.  The values
     are a list of the names of the attribute of that type.
 
-    gist((1,2,3))
-    Out: {builtin_function_or_method: [count, index]}
+    >>> gist((1,2,3))
+    {builtin_function_or_method: [count, index]}
 
-    gist(numpy.array([1,2,3]))
-    Out: {buffer: [data],
+    >>> gist(numpy.array([1,2,3]))
+    {buffer: [data],
       int: [itemsize, nbytes, ndim, size],
       builtin_function_or_method: [all, any, argmax]
       tuple: [shape, strides],
@@ -118,19 +118,19 @@ def recursive_type(obj, max=50):
     """Recursive type() function.  Try to give a concise description of
     the type of an object and all objects it contains.
 
-    recursive_type(1) 
+    >>> recursive_type(1) 
     'int'
 
-    recursive_type((1, 1.1, 2))
+    >>> recursive_type((1, 1.1, 2))
     ['tuple of', 'int', 'float', 'int']
 
-    recursive_type((1, 2, 3))
+    >>> recursive_type((1, 2, 3))
     'tuple of 3 int'
 
-    recursive_type(([1,2], [3,4], [5,6]))
+    >>> recursive_type(([1,2], [3,4], [5,6]))
     ['tuple of 3', 'list of 2 int']
 
-    recursive_type((numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])))
+    >>> recursive_type((numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])))
     ['tuple of 3', 'ndarray of (2,) int64']
 
     """
