@@ -11,5 +11,5 @@ setup(
     # url='http://pypi.python.org/pypi/grasp/',
     # license='LICENSE.txt',
     description='Useful introspection tools.',
-    long_description=open('README.txt').read(),
+    long_description=open('README').read(),
 )
