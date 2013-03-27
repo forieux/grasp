@@ -1,6 +1,10 @@
 import IPython
 import grasp
 
+# deepreloads of IPython cause a crash, so add it to the list of
+# excludes for deep reloads
+dreload_excludes = ['sys', 'os.path', '__builtin__', '__main__', 'IPython']
+
 ##############################
 ## Provide IPython magic commands
 @IPython.core.magic.magics_class
@@ -259,10 +263,6 @@ class IntrospectionMagics(IPython.core.magic.Magics):
         else:
             obj = eval(line)            
         return grasp.recursive_type(obj, **kw)
-
-# deepreloads of IPython cause a crash, so add it to the list of
-# excludes for deep reloads
-dreload_excludes = ['sys', 'os.path', '__builtin__', '__main__', 'IPython']
 
 @IPython.core.magic.magics_class
 class ReloadMagics(IPython.core.magic.Magics):
