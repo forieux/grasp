@@ -95,7 +95,7 @@ def gist(obj, verbose=False, pretty=True):
 
     info = []
     for name in dir(obj):
-        if verbose or (not verbose and not name.startswith('_')):
+        if verbose or not name.startswith('_'):
             try: attr = getattr(obj, name)
             except: attr = Exception
             info.append((name, type(attr)))
