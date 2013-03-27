@@ -110,7 +110,7 @@ def gist(obj, verbose=False, pretty=True):
     result = {}
     for tt in types:
         names = [string(name) for name, the_type in info if the_type is tt]        
-        result[string(t.__name__)] = names
+        result[string(tt.__name__)] = names
         #result.append((t.__name__, names))
     return result
 
