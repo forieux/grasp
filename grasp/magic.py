@@ -41,7 +41,7 @@ Using the one from the user's namespace."""
             elif in_module_ns:
                 kw['search'] = getattr(grasp, opts['s'])
             else:
-                kw['search'] = eval(opts['s'])
+                kw['search'] = eval(opts['s'], self.shell.user_ns)
             
         # this is the thing in which to search.  Look for an object in
         # the user's namespace, if not, assume it's a literal object
