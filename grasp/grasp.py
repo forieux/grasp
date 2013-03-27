@@ -4,9 +4,6 @@
 # Taken
 # grok sense gist pygist fathom
 
-__version__ = 0.3.0dev
-__author__ = "Greg Novak <greg.novak@gmail.com>"
-
 import types, re
 
 # Optionally handle numpy types
