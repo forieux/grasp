@@ -167,79 +167,6 @@ def recursive_type(obj, max=50):
 ##################################################
 
 ##############################
-## Apropos interface: commonly use cases with convenient syntax
-
-def apropos_name(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a substring
-    of the name.  See apropos() for addtional keyword arguments.
-    Typical usage is apropos_name('string', module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_name, **kw)
-
-def apropos_value(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a substring
-    the string representation of the object.  See apropos() for
-    addtional keyword arguments.  Typical usage is
-    apropos_value('string', module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_value, **kw)
-
-def apropos_doc(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a substring
-    of the documentation string of the object.  See apropos() for
-    addtional keyword arguments.  Typical usage is
-    apropos_doc('string', module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_doc, **kw)
-
-def apropos_name_regexp (needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a regexp
-    matching the name.  See apropos() for addtional keyword arguments.
-    Typical usage is apropos_name_regexp('string', module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_name_regexp, **kw)
-
-def apropos_value_regexp(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a regexp
-    matching the string representation of the object.  See apropos()
-    for addtional keyword arguments.  Typical usage is
-    apropos_value_regexp('string', module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_value_regexp, **kw)
-
-def apropos_doc_regexp(needle, haystack=None, **kw):
-    """Recursively search for attributes with where needle is a regexp
-    matching the docstring of the object.  See apropos() for addtional
-    keyword arguments.  Typical usage is apropos_doc_regexp('string',
-    module).
-
-    Return a list of strings showing the path to reach the matching
-    object
-
-    """
-    return apropos(needle, haystack, search=search_doc_regexp, **kw)
-
-##############################
 ## Main apropos interface function.
 def apropos(needle, haystack=None, name=None,
             search=None, **kw):
@@ -314,6 +241,79 @@ def search_doc_regexp(needle, name, obj):
     return hasattr(obj, '__doc__') \
            and obj.__doc__ \
            and re.search(needle, obj.__doc__)
+
+##############################
+## Apropos interface: commonly use cases with convenient syntax
+
+def apropos_name(needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a substring
+    of the name.  See apropos() for addtional keyword arguments.
+    Typical usage is apropos_name('string', module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_name, **kw)
+
+def apropos_value(needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a substring
+    the string representation of the object.  See apropos() for
+    addtional keyword arguments.  Typical usage is
+    apropos_value('string', module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_value, **kw)
+
+def apropos_doc(needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a substring
+    of the documentation string of the object.  See apropos() for
+    addtional keyword arguments.  Typical usage is
+    apropos_doc('string', module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_doc, **kw)
+
+def apropos_name_regexp (needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a regexp
+    matching the name.  See apropos() for addtional keyword arguments.
+    Typical usage is apropos_name_regexp('string', module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_name_regexp, **kw)
+
+def apropos_value_regexp(needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a regexp
+    matching the string representation of the object.  See apropos()
+    for addtional keyword arguments.  Typical usage is
+    apropos_value_regexp('string', module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_value_regexp, **kw)
+
+def apropos_doc_regexp(needle, haystack=None, **kw):
+    """Recursively search for attributes with where needle is a regexp
+    matching the docstring of the object.  See apropos() for addtional
+    keyword arguments.  Typical usage is apropos_doc_regexp('string',
+    module).
+
+    Return a list of strings showing the path to reach the matching
+    object
+
+    """
+    return apropos(needle, haystack, search=search_doc_regexp, **kw)
 
 ##################################################
 ## Apropos implementation guts.
