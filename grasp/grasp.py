@@ -12,7 +12,7 @@ except ImportError: numpy = False
 
 # Try to register IPython magic commands if IPython is available
 try: import magic
-except: pass
+except ImportError: pass
 
 ##################################################
 # Information about types for apropos searches.
