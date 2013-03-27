@@ -1,1 +1,212 @@
-Some introduction.
+====================
+ Grasp
+====================
+
+A set of python functions to help with interactive object inspection
+and discovery.  
+
+These help one grok, grasp, or get the gist of running code.  They're
+most useful in the context of an interactive IPython session, but can
+be used in any Python shell.  They produce output that can be parsed
+programmatically if you find that useful.  I'll start with examples
+using the provided IPython magic commands, since that's how I use
+them.  I'll show how to use them in other contexts below.
+
+There are basically three functions provided:
+ * gist -- object inspection
+ * rtype -- recursive type, deep object inspection
+ * apropos -- deep search for things with a given name, value, etc.
+
+Introduction
+============
+
+gist
+----
+
+Suppose you are confronted with an unfamiliar object.  What are
+its characteristics?  What kinds of things can it do?  What
+information does it contain?  
+
+gist returns all the attributes of the object organized by type:
+
+In [1]: foo = 5
+In [2]: %gist foo
+Out[2]: {builtin_function_or_method: [bit_length, conjugate],
+         int: [denominator, imag, numerator, real]}
+
+The return value is a dict with one key for each type.  The value of
+each key is a list of strings giving the names of all the attributes
+of the given type.  So integer objects have four integer attributes,
+named numerator, denomintor, real, and imag, (accessed via foo.real)
+as well as two function attributes (accessed via foo.bit_length())
+named bit_length and conjugate.
+
+By default, attributes with leading underscores are omitted.  You can
+include them by asking for verbose output (the output below is trimmed
+for brevity):
+
+In [3]: %gist -v foo
+Out[3]: {method-wrapper: [__abs__, __add__],
+         int: [denominator, imag, numerator, real],
+         builtin_function_or_method: [__format__, __getnewargs__,
+                                      bit_length, conjugate],
+         str: [__doc__],
+         type: [__class__]}
+
+
+You can pass literal objects to the magic command (again, output
+trimmed):
+
+In [4]: %gist numpy.array([1,2,3])
+Out[4]: {buffer: [data],
+            int: [itemsize, nbytes, ndim, size],
+            builtin_function_or_method: [all, any, argmax]
+            tuple: [shape, strides],
+            ndarray: [T, imag, real]}
+
+rtype
+-----
+
+Suppose you are confronted with a list that contains a deeply nested
+structure of tuples, lists, and so on.  What is this object all about?
+Are there regularities in the structure?  You want a function like
+type(), but you want it to be recursive so that it summarizes the
+contents of the object as much as possible.
+
+Start with a trivial case:
+
+In [1]: %rtype 1
+Out[1]: 'int'
+
+If the object is a tuple of objects, all of the same type, say so.
+
+In [3]: %rtype [1, 2, 3]
+Out[3]: 'list of 3 int'
+
+What if it's a tuple of heterogeneous types?  List them all.
+
+In [2]: %rtype [1, 1.1, 2]
+Out[2]: ['list of', 'int', 'float', 'int']
+
+The rtype function is recursive, so this gets interesting when you add
+another layer of container objects:
+
+In [4]: %rtype [(1,2), (3,4), (5,6)]
+Out[4]: ['list of 3', 'tuple of 2 int']
+
+The rtype function knows about numpy arrays and classifies them
+according to shape and type.
+
+In [5]: %rtype [numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])]
+Out[5]: ['list of 3', 'ndarray of (2,) int64']
+
+apropos
+-------
+
+I know that matplotlib (a Python plotting library) defines a bunch of
+colormaps, but I don't have any idea where to find them.  I can search
+recursively through the whole module namespace, returning all of the
+ways to 'reach' objects with names having to do with colormaps:
+
+In [1]: import matplotlib
+In [2]: %apropos cmap matplotlib
+Out[2]: ['matplotlib._cm.np._import_tools.os.UserDict._abcoll.sys.modules[matplotlib.streamplot].cm._cmapnames',
+         'matplotlib._cm.np._import_tools.os.UserDict._abcoll.sys.modules[matplotlib.streamplot].cm._generate_cmap']
+
+Note the many layers of indirection that apropos digs through to
+arrive at the results.  Apropos is similar to the standard %psearch
+magic command that's included in IPython.  The difference is that
+except that psearch only handles one level at a time (although it can
+search intermediate modules, as long as you know how many dots
+separate the target from the module).
+
+In [3]: %psearch matplotlib.cmap* 
+In [4]: %psearch matplotlib.*.cmap* 
+
+You can also search for objects whose string representation contains a
+given string.  If no object to search is given, search the entire
+namespace given by globals()
+
+In [5]: %apvalue blue 
+
+Finally, you can search for objects whose docstring contains a given
+string
+
+In [6]: %apdoc colors matplotlib
+
+Finally, there are versions of each of the above that accept regular
+expressions:
+
+In [7]: %apname_regex [Cc]olors
+
+In [8]: %apvalue_regex [Cc]olors
+
+In [9]: %adoc_regex [Cc]olors
+
+Installation
+============
+
+Installation is the standard distutils routine:
+
+python setup.py install 
+
+To install in the user-specific Python directory:
+
+python setup.py install --user
+
+To install somewhere under the user's home directory:
+
+python setup.py install --home=~/some/place
+
+There are two ways to load grasp automatically when IPython is
+started.  
+
+1. Put a file containing "import grasp" in the directory
+   ~/.ipython/profile_default/startup/
+
+2. Open or create the file
+   ~/.ipython/profile_default/ipython_config.py 
+   and add this line to it:
+   c.InteractiveShellApp.exec_lines = ['import grasp']
+
+grasp automatically tries to register the magic commands with IPython,
+although it does not complain if IPython is not found.  You should see
+the magic commands listed when you type %lsmagic.
+
+Non-IPython Environments
+========================
+
+If you don't use IPython, you just call the python functions upon
+which the magic functions are based directly.  The translation between
+the magic command arguments given above and the arguments of the
+Python functions should be straightforward.  The magic commands
+sometimes have shorter, more cryptic names with a view toward saving
+keystrokes during heavy interactive use.  It will look something like
+this:
+
+>>> import grasp
+>>> grasp.gist([1,2,3], verbose=True)
+>>> grasp.apropos_name('foo', grasp)
+>>> grasp.recursive_type([1,2,3])
+
+IPython has nice pretty-printing facilities, and I took advantage of
+those in deciding how grasp presents the information it finds.  Thus
+gist() returns a dict and relies on IPython to format it in a readable
+way for interactive use.  This means that it's possible to use the
+output programatically.  One could, for example, do this to set 
+every attribute of a class with integer type to 42:
+
+atts = grasp.gist(object)
+for att in atts['int']:
+    setattr(object, att, 42)
+
+Acknowledgements
+================
+
+Grasp was written in 2006 by Greg Novak <greg.novak@gmail.com> and
+cleaned up for public consumption by the same in 2013.
+
+This was written for my own use when developing Python code to produce
+and analyze simulation output using the excellent IPython, Numpy,
+Scipy, and matplotlib packages.  I have benefited enormously from the
+work of the authors of those packages over the years.
