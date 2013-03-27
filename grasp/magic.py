@@ -201,15 +201,15 @@ class IntrospectionMagics(IPython.core.magic.Magics):
 
         -v : Verbose output.  Include attributes with a leading underscore.
 
-        %gist (1,2,3)
-        Out: {builtin_function_or_method: [count, index]}
+        In [1]: %gist (1,2,3)
+        Out[1]: {builtin_function_or_method: [count, index]}
 
-        %gist numpy.array([1,2,3])
-        Out: {buffer: [data],
-              int: [itemsize, nbytes, ndim, size],
-              builtin_function_or_method: [all, any, argmax]
-              tuple: [shape, strides],
-              ndarray: [T, imag, real]}
+        In [2]: %gist numpy.array([1,2,3])
+        Out[2]: {buffer: [data],
+                    int: [itemsize, nbytes, ndim, size],
+                    builtin_function_or_method: [all, any, argmax]
+                    tuple: [shape, strides],
+                    ndarray: [T, imag, real]}
 
         """
         # Also recognize this argument, but don't see why people will
@@ -237,20 +237,20 @@ class IntrospectionMagics(IPython.core.magic.Magics):
 
         -m <int> : Maximum size of container objects break apart for inspection.
 
-        %rtype 1
-        Out: 'int'
+        In [1]: %rtype 1
+        Out[1]: 'int'
 
-        %rtype (1, 1.1, 2)
-        Out: ['tuple of', 'int', 'float', 'int']
+        In [2]: %rtype (1, 1.1, 2)
+        Out[2]: ['tuple of', 'int', 'float', 'int']
 
-        %rtype (1, 2, 3)
-        Out: 'tuple of 3 int'
+        In [3]: %rtype (1, 2, 3)
+        Out[3]: 'tuple of 3 int'
 
-        %rtype ([1,2], [3,4], [5,6])
-        Out: ['tuple of 3', 'list of 2 int']
+        In [4]: %rtype ([1,2], [3,4], [5,6])
+        Out[4]: ['tuple of 3', 'list of 2 int']
 
-        %rtype (numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6]))
-        Out: ['tuple of 3', 'ndarray of (2,) int64']
+        In [5]: %rtype (numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6]))
+        Out[5]: ['tuple of 3', 'ndarray of (2,) int64']
 
         """
         opts, arg = self.parse_options(line, 'm:')
