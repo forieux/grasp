@@ -97,6 +97,8 @@ def gist(obj, verbose=False, pretty=True):
     for name in dir(obj):
         if verbose or not name.startswith('_'):
             try: attr = getattr(obj, name)
+            # TODO -- bare except clause here.  What exceptions am I
+            # afraid of?
             except: attr = Exception
             info.append((name, type(attr)))
 
