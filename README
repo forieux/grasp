@@ -76,31 +76,31 @@ type structure of the object as much as possible.
 
 Start with a trivial case:
 
-In [1]: %rtype 1
-Out[1]: 'int'
+In [5]: %rtype 1
+Out[5]: 'int'
 
 If the object is a tuple of objects, all of the same type, say so.
 
-In [3]: %rtype [1, 2, 3]
-Out[3]: 'list of 3 int'
+In [6]: %rtype [1, 2, 3]
+Out[6]: 'list of 3 int'
 
 What if it's a tuple of heterogeneous types?  List them all.  Note
 that the return value is now a list of strings.
 
-In [2]: %rtype [1, 1.1, 2]
-Out[2]: ['list of', 'int', 'float', 'int']
+In [7]: %rtype [1, 1.1, 2]
+Out[7]: ['list of', 'int', 'float', 'int']
 
 The rtype function is recursive, so this gets interesting when you add
 another layer of container objects:
 
-In [4]: %rtype [(1,2), (3,4), (5,6)]
-Out[4]: ['list of 3', 'tuple of 2 int']
+In [8]: %rtype [(1,2), (3,4), (5,6)]
+Out[8]: ['list of 3', 'tuple of 2 int']
 
 The rtype function knows about numpy arrays and classifies them
 according to shape and type.
 
-In [5]: %rtype [numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])]
-Out[5]: ['list of 3', 'ndarray of (2,) int64']
+In [9]: %rtype [numpy.array([1,2]), numpy.array([3,4]), numpy.array([5,6])]
+Out[9]: ['list of 3', 'ndarray of (2,) int64']
 
 apropos
 -------
@@ -111,9 +111,9 @@ within the module.  I can search recursively through the whole module
 namespace, returning all of the ways to 'reach' objects with names
 having to do with colormaps:
 
-In [1]: import matplotlib
-In [2]: %apropos cmap matplotlib
-Out[2]: ['matplotlib.cm.cmapname',
+In [10]: import matplotlib
+In [11]: %apropos cmap matplotlib
+Out[11]: ['matplotlib.cm.cmapname',
          'matplotlib.cm.get_cmap']
 
 Note the many layers of indirection that apropos digs through to
@@ -123,29 +123,29 @@ psearch only handles one level at a time (although it can search
 intermediate modules, as long as you know how many dots separate the
 target from the module).
 
-In [3]: %psearch matplotlib.cmap* 
-In [4]: %psearch matplotlib.*.cmap* 
+In [12]: %psearch matplotlib.cmap* 
+In [13]: %psearch matplotlib.*.cmap* 
 
 Using apropos, you can also search for objects whose string
 representation contains a given string.  If no object to search is
 given, search the entire namespace given by globals()
 
-In [5]: %apvalue blue 
+In [14]: %apvalue blue 
 
 You can search for objects whose docstring contains a given string.
 Use quotes if the search string contains a space (this works for any
 of the aporpos commands).
 
-In [6]: %apdoc "colormap instance" matplotlib
+In [15]: %apdoc "colormap instance" matplotlib
 
 There are versions of each of the above that accept regular
 expressions.  
 
-In [7]: %apname_regex [Cc]olors
+In [16]: %apname_regex [Cc]olors
 
-In [8]: %apvalue_regex [Cc]olors
+In [17]: %apvalue_regex [Cc]olors
 
-In [9]: %adoc_regex [Cc]olors
+In [18]: %adoc_regex [Cc]olors
 
 You can also pass python code as the object in which to search and it
 will be evaluated, should you find that useful.  The apropos commands
@@ -153,23 +153,23 @@ assume that the first argument is the search string and everything
 else is the object in which to search, so the second argument doesn't
 need to be quoted if it contains spaces.
 
-In [6]: %apdoc "colormap instance" dict(a=matplotlib, b=numpy)
+In [18]: %apdoc "colormap instance" dict(a=matplotlib, b=numpy)
 
 You can search for python objects (rather than strings) using %apobj.
 This gives the name of any object equal to the tuple (1,3,5) in the
 numpy module.
 
-In [6]: %apobj (1,3,5) numpy
+In [19]: %apobj (1,3,5) numpy
 
 If the search object contains spaces, it must be quoted
 
-In [6]: %apobj "(1, 3, 5)" numpy
+In [20]: %apobj "(1, 3, 5)" numpy
 
 You can refer to variables in the user's namespace
 
-In [7]: foo = numpy.array([1,2,3])
-In [8]: %apobj foo numpy
-In [8]: %apobj [foo,37] numpy
+In [21]: foo = numpy.array([1,2,3])
+In [22]: %apobj foo numpy
+In [23]: %apobj [foo,37] numpy
 
 With the %apropos and %aobj commands, you can provide your own
 function that returns True if the object should be considered a match
@@ -178,21 +178,22 @@ function (probably requiring quotation marks).  In the latter case the
 code will be evaluated.  See the docstrings for %apropos and %apobj
 for details.
 
-In [9]: def my_search_fn(needle, name, obj): return name and needle in name
+In [24]: def my_search_fn(needle, name, obj): return name and needle in name
 
-In [9]: %apropos -s my_search_fn Colors 
-In [9]: %apropos -s "lambda needle, name, obj: name and needle in name" Colors 
+In [25]: %apropos -s my_search_fn Colors 
+In [26]: %apropos -s "lambda needle, name, obj: name and needle in name" Colors 
 
 For examples, see the search functions in the grasp module:
 
-In []: %apname search grasp
-Out[]: ['grasp.search_doc',
-        'grasp.search_doc_regexp',
-        'grasp.search_equal',
-        'grasp.search_name',
-        'grasp.search_name_regexp',
-        'grasp.search_value',
-        'grasp.search_value_regexp']
+In [27]: %apname search grasp
+Out[27]: ['grasp.search_doc',
+          'grasp.search_doc_regexp',
+          'grasp.search_equal',
+          'grasp.search_name',
+          'grasp.search_name_regexp',
+          'grasp.search_value',
+          'grasp.search_value_regexp']
+In [28]: grasp.search_doc?
 
 A final note is that apropos is meant to be exhaustive, so it tends to
 return more than you need.  You generally have to pick through the
