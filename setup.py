@@ -7,6 +7,7 @@ setup(
     author='Greg Novak',
     author_email='greg.novak@gmail.com',
     packages=['grasp', 'grasp.test'],
+    # http://launchpad.net/grasp
     url='http://pypi.python.org/pypi/grasp/',
     description='Useful introspection tools.',
     long_description=open('README').read(),
