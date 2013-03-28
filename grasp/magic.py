@@ -1,3 +1,4 @@
+import types
 import IPython
 import grasp
 
@@ -10,11 +11,40 @@ dreload_excludes = ['sys', 'os.path', '__builtin__', '__main__', 'IPython']
 @IPython.core.magic.magics_class
 class AproposMagics(IPython.core.magic.Magics):
     """Magic functions for all of the various apropos possibilities."""
+    def fetch_or_eval(self, str, nss=tuple()):
+        """Try to fetch a name from a namespace.  If that fails, evaluate the
+        object.  The order of precedence is: 1) name in the user
+        namespace, 2) name in the namespaces given in nss, a list of
+        namespaces, searched in order, 3) eval in the user's
+        namespace.
+
+        """
+        # This is completely equivalent to just calling eval in the
+        # appropriate namespace.  If the arg is a name, it will be
+        # fetched from the namespace.  However, it makes me feel funny
+        # to use eval that way when there's a perfectly good way to
+        # just fetch the object by name.
+        if str in self.shell.user_ns:
+            return self.shell.user_ns[str]
+        else:
+            for ns in nss:
+                # Ugh, allow nss to be a module
+                if type(ns) is types.ModuleType:
+                    if hasattr(ns, str):
+                        return getattr(ns, str)
+                else:
+                    if str in ns:
+                        return ns[str]
+        return eval(str, self.shell.user_ns)
+
     def parse_apropos_args(self, line):
         """Parse arguments for all of the apropos* functions"""
         # Possible args I'm ignoring for now:
         # haystack_name, name
-        opts, arg = self.parse_options(line, 'd:s:', mode='list')
+        # 
+        # Using mode='list' here makes it easier to be independent of
+        # extraneous whitespace.
+        opts, arg_strings = self.parse_options(line, 'd:s:e', mode='list')
         kw = {}
         if 'd' in opts: 
             kw['max_depth'] = int(opts['d'])
@@ -26,31 +56,84 @@ class AproposMagics(IPython.core.magic.Magics):
         # keyword arg was provided twice if the user gives a search
         # function anyway.
         if 's' in opts:
-            # search is either the name of a function in the user's
-            # namespace, the name of a function in the grasp module's
-            # namepsace, or else an anonymous function.
-            in_user_ns = (opts['s'] in self.shell.user_ns 
-                          and callable(self.shell.user_ns[opts['s']]))
-            in_module_ns = (hasattr(grasp, opts['s'])
-                            and callable(getattr(grasp, opts['s'])))
-            if in_user_ns and in_module_ns:
-                print """Found search functions in user namespace and module namespace.
-Using the one from the user's namespace."""
-            if in_user_ns:
-                kw['search'] = self.shell.user_ns[opts['s']]
-            elif in_module_ns:
-                kw['search'] = getattr(grasp, opts['s'])
-            else:
-                kw['search'] = eval(opts['s'], self.shell.user_ns)
-            
-        # this is the thing in which to search.  Look for an object in
-        # the user's namespace, if not, assume it's a literal object
-        # and evaluate it.
-        if len(arg) == 2:
-            if arg[1] in self.shell.user_ns:
-                arg[1] = self.shell.user_ns[arg[1]]
-            else:
-                arg[1] = eval(arg[1])
+            kw['search'] = self.fetch_or_eval(opts['s'], [grasp])
+
+        # Would like to allow evaluation of the first arg (the needle)
+        # as well as the second arg (the haystack).  However, it's
+        # hard to see how to do this in a general way with nice
+        # syntax.  The possibilities I see are: 
+        # 
+        # 1) require quoting so that getopt can split it.  This breaks
+        # the illusion that you're just typing at a normal python
+        # prompt.  
+        #
+        # 2) Require the whole string to evaluate to a tuple that's
+        # passed as args to apropos.  This is ok, commas come between
+        # args anyway. However, the metaphor with magic commands is
+        # more like the unix shell, where args are separated by
+        # spaces, not commas.  
+        # 
+        # 3) Specify that the first arg be a string and do not allow
+        # evaluation of it.  Since the code implementing the search
+        # (grasp.apropos) expects it to be a string, this is "honest"
+        # to the underlying implmentation.  
+        #
+        # 4) Specify a keyword separator between them, like 'in', so
+        # that calls look like the following: 
+        # %apropos name
+        # %apropos name in IPython
+        # %apvalue 1.1 in IPython
+        # %apropos name in [IPython, matplotlib]
+        # %apvalue 1.1 in [IPython, matplotlib]
+        # 
+        # The problem with #4 this is that in could concievably appear
+        # in the code to evaluate, being as it is a reserved word in
+        # Python.  However, this seems unlikely, and if it does I can
+        # either a) ask the user to disambiguate with quotes (then I
+        # have to pass it to getopts?) or b) try evaling all
+        # possibilities, catching syntax exceptions.  The latter seems
+        # a bit reckless.
+        # 
+        # Actually, it's a bit of an advantage that in is a reserved
+        # word, because then the user can't have variables named in
+        # that would lead to ambiguous statements like "%apropos name
+        # in in" 
+        #
+        # So, go with #4, asking the user to disambiguate if
+        # necessary.  find index of keyword separating needle from
+        # haystack
+        #
+        # However, after implementing this, I find that I have an
+        # ambiguity if needle is just a literal string.  Do I evaluate
+        # it or not?  I could try to evaluate it and catch exceptions,
+        # just giving it as a literal string there are exceptions.
+        # That seems clumsy, too.
+        #
+        # So now I'm leaning toward: 
+        #
+        # 5) Force it to be a string.  Force it to be quoted if it has
+        # spaces.  Allow it to be evaluated with a switch.  I think
+        # this is fully unambiguous, and doens't need the 'in'
+        # keyword.
+        # 
+        # arg will hold the positional args of apropos
+        arg = [None, None]
+        if 'e' in opts:
+            arg[0] = self.fetch_or_eval(arg_strings[0])
+        else:
+            arg[0] = arg_strings[0]
+
+        if len(arg_strings)==1: 
+            # The user didn't provide something to search.  Calling
+            # globals() here or in grasp.py doesn't make sense, so
+            # send in the user's namespace for haystack            
+            arg[1] = self.shell.user_ns                
+        else:
+            # User provided both needle and haystack
+            # This may be an expression and therefore may have spaces
+            # in it, so join them up into one string before evaling.
+            arg[1] = self.fetch_or_eval(' '.join(arg_strings[1:]))
+
         return arg, kw
     
     @IPython.core.magic.line_magic
