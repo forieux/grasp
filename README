@@ -7,10 +7,11 @@ and discovery.
 
 These help one grok, grasp, or get the gist of running code.  They're
 most useful in the context of an interactive IPython session, but can
-be used in any Python shell.  They produce output that can be parsed
-programmatically if you find that useful.  I'll start with examples
-using the provided IPython magic commands, since that's how I use
-them.  I'll show how to use them in other contexts below.
+be used in any Python shell.  They're also helpful in the debugger.
+They produce output that can be parsed programmatically if you find
+that useful.  I'll start with examples using the provided IPython
+magic commands, since that's how I use them.  Then I'll show how to
+use them in other contexts.
 
 There are basically three functions provided:
  * gist -- object inspection
@@ -24,7 +25,7 @@ gist
 ----
 
 Suppose you are confronted with an unfamiliar object.  What are
-its characteristics?  What kinds of things can it do?  What
+its characteristics?  What kinds of things can it do?  What kind 
 information does it contain?  
 
 gist returns all the attributes of the object organized by type:
@@ -37,13 +38,13 @@ Out[2]: {builtin_function_or_method: [bit_length, conjugate],
 The return value is a dict with one key for each type.  The value of
 each key is a list of strings giving the names of all the attributes
 of the given type.  So integer objects have four integer attributes,
-named numerator, denomintor, real, and imag, (accessed via foo.real)
-as well as two function attributes (accessed via foo.bit_length())
-named bit_length and conjugate.
+named numerator, denomintor, real, and imag, (accessed via foo.real,
+etc.)  as well as two function attributes (accessed via
+foo.bit_length(), etc) named bit_length and conjugate.
 
 By default, attributes with leading underscores are omitted.  You can
-include them by asking for verbose output (the output below is trimmed
-for brevity):
+include them by asking for verbose output with -v (the output below is
+trimmed for brevity):
 
 In [3]: %gist -v foo
 Out[3]: {method-wrapper: [__abs__, __add__],
@@ -54,8 +55,8 @@ Out[3]: {method-wrapper: [__abs__, __add__],
          type: [__class__]}
 
 
-You can pass literal objects to the magic command (again, output
-trimmed):
+You can pass python code to the magic command, which is evalated.
+(again, output trimmed):
 
 In [4]: %gist numpy.array([1,2,3])
 Out[4]: {buffer: [data],
@@ -71,7 +72,7 @@ Suppose you are confronted with a list that contains a deeply nested
 structure of tuples, lists, and so on.  What is this object all about?
 Are there regularities in the structure?  You want a function like
 type(), but you want it to be recursive so that it summarizes the
-contents of the object as much as possible.
+type structure of the object as much as possible.
 
 Start with a trivial case:
 
@@ -83,7 +84,8 @@ If the object is a tuple of objects, all of the same type, say so.
 In [3]: %rtype [1, 2, 3]
 Out[3]: 'list of 3 int'
 
-What if it's a tuple of heterogeneous types?  List them all.
+What if it's a tuple of heterogeneous types?  List them all.  Note
+that the return value is now a list of strings.
 
 In [2]: %rtype [1, 1.1, 2]
 Out[2]: ['list of', 'int', 'float', 'int']
@@ -103,45 +105,98 @@ Out[5]: ['list of 3', 'ndarray of (2,) int64']
 apropos
 -------
 
-I know that matplotlib (a Python plotting library) defines a bunch of
-colormaps, but I don't have any idea where to find them.  I can search
-recursively through the whole module namespace, returning all of the
-ways to 'reach' objects with names having to do with colormaps:
+Suppose I know that matplotlib (a Python plotting library) defines a
+bunch of colormaps, but I don't have any idea where to find them
+within the module.  I can search recursively through the whole module
+namespace, returning all of the ways to 'reach' objects with names
+having to do with colormaps:
 
 In [1]: import matplotlib
 In [2]: %apropos cmap matplotlib
-Out[2]: ['matplotlib._cm.np._import_tools.os.UserDict._abcoll.sys.modules[matplotlib.streamplot].cm._cmapnames',
-         'matplotlib._cm.np._import_tools.os.UserDict._abcoll.sys.modules[matplotlib.streamplot].cm._generate_cmap']
+Out[2]: ['matplotlib.cm.cmapname',
+         'matplotlib.cm.get_cmap']
 
 Note the many layers of indirection that apropos digs through to
 arrive at the results.  Apropos is similar to the standard %psearch
-magic command that's included in IPython.  The difference is that
-except that psearch only handles one level at a time (although it can
-search intermediate modules, as long as you know how many dots
-separate the target from the module).
+magic command that's included in IPython.  The difference is that that
+psearch only handles one level at a time (although it can search
+intermediate modules, as long as you know how many dots separate the
+target from the module).
 
 In [3]: %psearch matplotlib.cmap* 
 In [4]: %psearch matplotlib.*.cmap* 
 
-You can also search for objects whose string representation contains a
-given string.  If no object to search is given, search the entire
-namespace given by globals()
+Using apropos, you can also search for objects whose string
+representation contains a given string.  If no object to search is
+given, search the entire namespace given by globals()
 
 In [5]: %apvalue blue 
 
-Finally, you can search for objects whose docstring contains a given
-string
+You can search for objects whose docstring contains a given string.
+Use quotes if the search string contains a space (this works for any
+of the aporpos commands).
 
-In [6]: %apdoc colors matplotlib
+In [6]: %apdoc "colormap instance" matplotlib
 
-Finally, there are versions of each of the above that accept regular
-expressions:
+There are versions of each of the above that accept regular
+expressions.  
 
 In [7]: %apname_regex [Cc]olors
 
 In [8]: %apvalue_regex [Cc]olors
 
 In [9]: %adoc_regex [Cc]olors
+
+You can also pass python code as the object in which to search and it
+will be evaluated, should you find that useful.  The apropos commands
+assume that the first argument is the search string and everything
+else is the object in which to search, so the second argument doesn't
+need to be quoted if it contains spaces.
+
+In [6]: %apdoc "colormap instance" dict(a=matplotlib, b=numpy)
+
+You can search for python objects (rather than strings) using %apobj.
+This gives the name of any object equal to the tuple (1,3,5) in the
+numpy module.
+
+In [6]: %apobj (1,3,5) numpy
+
+If the search object contains spaces, it must be quoted
+
+In [6]: %apobj "(1, 3, 5)" numpy
+
+You can refer to variables in the user's namespace
+
+In [7]: foo = numpy.array([1,2,3])
+In [8]: %apobj foo numpy
+In [8]: %apobj [foo,37] numpy
+
+With the %apropos and %aobj commands, you can provide your own
+function that returns True if the object should be considered a match
+and false otherwise.  This can be a named function on an anonymous
+function (probably requiring quotation marks).  In the latter case the
+code will be evaluated.  See the docstrings for %apropos and %apobj
+for details.
+
+In [9]: def my_search_fn(needle, name, obj): return name and needle in name
+
+In [9]: %apropos -s my_search_fn Colors 
+In [9]: %apropos -s "lambda needle, name, obj: name and needle in name" Colors 
+
+For examples, see the search functions in the grasp module:
+
+In []: %apname search grasp
+Out[]: ['grasp.search_doc',
+        'grasp.search_doc_regexp',
+        'grasp.search_equal',
+        'grasp.search_name',
+        'grasp.search_name_regexp',
+        'grasp.search_value',
+        'grasp.search_value_regexp']
+
+A final note is that apropos is meant to be exhaustive, so it tends to
+return more than you need.  You generally have to pick through the
+results a little to find what you want.
 
 Installation
 ============
@@ -172,6 +227,9 @@ started.
 grasp automatically tries to register the magic commands with IPython,
 although it does not complain if IPython is not found.  You should see
 the magic commands listed when you type %lsmagic.
+
+I have used this package on Gnu/Linux and OS X.  I have no idea how/if
+it works on Windows.
 
 Non-IPython Environments
 ========================
