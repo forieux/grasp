@@ -10,9 +10,12 @@ import types, re
 try: import numpy
 except ImportError: numpy = False
 
-# Try to register IPython magic commands if IPython is available
+# Try to register IPython magic commands if IPython is available If
+# IPython isn't installed, you get an import error.  If IPython is
+# installed but you're running under standard python, you get a name
+# error (from get_ipython() function failing to resolve)
 try: import magic
-except ImportError: pass
+except (ImportError, NameError): pass
 
 # This is just to test for a poorly written __cmp__ function in
 # distutils.version.LooseVersion.  Importing distutils should always work but I don't want to give the impression that we need it if something goes wrong.
