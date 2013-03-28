@@ -368,7 +368,7 @@ def _apropos(needle, haystack, haystack_name,
                 found.append(full_name)
         except (UnicodeDecodeError, UnicodeEncodeError):
             if print_warning[0]:
-                print "String problems at", full_name
+                print "Unicode string problems at", full_name
                 print_warning[0] = False
 
         # break apart if obj is not already searched
