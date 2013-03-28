@@ -214,6 +214,13 @@ To install somewhere under the user's home directory:
 
 python setup.py install --home=~/some/place
 
+To use grasp just do 
+import grasp
+
+If IPython is running, grasp will register the magic commands and
+you'll see them when you type
+%lsmagic
+
 There are two ways to load grasp automatically when IPython is
 started.  
 
