@@ -37,14 +37,14 @@ class AproposMagics(IPython.core.magic.Magics):
                         return ns[str]
         return eval(str, self.shell.user_ns)
 
-    def parse_apropos_args(self, line):
+    def parse_apropos_args(self, line, eval_needle=False):
         """Parse arguments for all of the apropos* functions"""
         # Possible args I'm ignoring for now:
         # haystack_name, name
         # 
         # Using mode='list' here makes it easier to be independent of
         # extraneous whitespace.
-        opts, arg_strings = self.parse_options(line, 'd:s:e', mode='list')
+        opts, arg_strings = self.parse_options(line, 'd:s:', mode='list')
         kw = {}
         if 'd' in opts: 
             kw['max_depth'] = int(opts['d'])
@@ -116,9 +116,27 @@ class AproposMagics(IPython.core.magic.Magics):
         # this is fully unambiguous, and doens't need the 'in'
         # keyword.
         # 
+        # Now that 5) is implemented, I realize that search_value
+        # starts to look dumb if it has conditionals for the type of
+        # needle.  What I really want is another search function.
+        # Then I think I need to pass in an equality predicate, since
+        # numpy arrays don't behave well with ==.  Then I realize that
+        # the search_ functions _are_ equality predicates.  So, when
+        # using apropos from python, I can give it whatever type I
+        # want for needle.  The only issue is how to get args from
+        # magic commands.  So, what I really, really want, is just
+        # another magic command that says "evalute needle."  I'll call
+        # it apobj (for apropos object).  It'll use search_equals
+        # (which tests for equality with ==) as the default and the
+        # user can pass search_array_equal via the -s switch if they
+        # want.  Now it's actually good that I let the search function
+        # resolve into the grasp module namespace so the user can
+        # easily get their hands on the two reasonable choices for
+        # equality.
+        # 
         # arg will hold the positional args of apropos
         arg = [None, None]
-        if 'e' in opts:
+        if eval_needle:
             arg[0] = self.fetch_or_eval(arg_strings[0])
         else:
             arg[0] = arg_strings[0]
@@ -249,6 +267,42 @@ class AproposMagics(IPython.core.magic.Magics):
         """
         aa, kw = self.parse_apropos_args(line)
         return grasp.apropos_doc(*aa, **kw)
+
+    @IPython.core.magic.line_magic
+    def apobj(self, line):
+        """%apobj [-d <max_depth>] [-s search_function] <needle> [haystack]
+
+        Search for objects equal to needle.  needle is evaluated.  It
+        should be quoted if spaces occur.  Return a list of matching
+        names.
+
+        haystack is an optional argument giving the object in which to
+        search.  It can be the name of an object in the user's
+        namespace or a literal object that is passed to eval
+
+        By default the equality test is the == operator, with numpy
+        arrays handled as a special case.
+
+        -d <max_depth> : search at most max_depth levels
+
+        -s <search_function> : Give the name of a function that takes
+        areguments f(needle, name, obj) where needle is the string
+        we're looking for, name is the name of the present object, and
+        obj is the present object.  The function returns True if the
+        object should be considered a match, False otherwise.  The
+        argument to the magic function can be the name of a function
+        in the user's namespace, the name of a function in the grasp
+        module's namespace (e.g. search_name or search_value, but
+        there are already other magic functions defined for those
+        possibilities) or an expression that is evaluated (i.e. a
+        lambda expression)
+
+        """
+        aa, kw = self.parse_apropos_args(line, eval_needle=True)
+        # provide a default for search function
+        if 'search' not in kw:
+            kw['search'] = grasp.search_equal
+        return grasp.apropos(*aa, **kw)
 
     @IPython.core.magic.line_magic
     def apdoc_regex(self, line):

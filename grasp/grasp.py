@@ -14,6 +14,13 @@ except ImportError: numpy = False
 try: import magic
 except ImportError: pass
 
+# This is just to test for a poorly written __cmp__ function in
+# distutils.version.LooseVersion.  Importing distutils should always work but I don't want to give the impression that we need it if something goes wrong.
+try: import distutils
+except ImportError: distutils = False
+
+verbose = False
+
 ##################################################
 # Information about types for apropos searches.
 ##################################################
@@ -233,10 +240,65 @@ def search_value(needle, name, obj):
     #
     # TODO What I really want to do is match the container if none of
     # its contents matched.
+    # 
+    # if the needle is a string, match against the string
+    # representation of the object.  If it's not a string, just test
+    # for equality.
     if type(obj) not in (types.TupleType, types.ListType,
                          types.DictType):
         return needle in str(obj)
         # NOTE -- should be repr() above?
+
+def search_equal(needle, name, obj):
+    """Match if needle is equal to obj"""
+    # This was more annoying than I thought, as we're walking through
+    # all objects in memory and some of them have poorly written
+    # __cmp__ functions that throw exceptions instead of returning
+    # False
+    # 
+    # as of March 2013, for my system, the value
+    # matplotlib.finance.stock_dt also causes problems.  This is a
+    # numpy dtype consisting of a list of numpy dtypes.  Apparently
+    # testing for equality against it causes creation of a numpy array
+    # of the given dtype, which numpy doesn't understand.  That's the
+    # only other strange case I see right now.  It requires me to
+    # protect both the numpy and the non-numpy equality tests with
+    # try..except.
+    # 
+    # distutils.version.LooseVersion fails unless both objects have a
+    # __version__ attribute.  So if they're not both instances of
+    # distutils.version.LooseVersion, return False
+    if distutils and ((isinstance(needle, distutils.version.LooseVersion) 
+                       and not isinstance(obj, distutils.version.LooseVersion))
+                      or (not isinstance(needle, distutils.version.LooseVersion) 
+                          and isinstance(obj, distutils.version.LooseVersion))):
+        return False
+
+    # Numpy has well-motivated behavior, so just handle it explicitly.
+    # If you test any sequence against any numpy type, you get a
+    # sequence, not a single boolean.  
+    if numpy and (type(needle) in numpy.typeDict.values()
+                  or type(obj) in numpy.typeDict.values()
+                  or type(needle) is numpy.ndarray
+                  or type(obj) is numpy.ndarray):
+
+        try: 
+            result = numpy.all(needle==obj)
+        except Exception as e:
+            if verbose: 
+                print "Exception encountered in test for equality, assuming unequal..."
+            result = False
+        return result
+
+    # if trying to test for equality throws an exception, then they're
+    # evidently not equal.
+    try: 
+        result = (needle == obj)
+    except Exception as e:
+        if verbose: 
+            print "Exception encountered in test for equality, assuming unequal..."
+        result = False
+    return result
 
 def search_doc(needle, name, obj):
     """Match if needle is contained in the docstring of obj"""

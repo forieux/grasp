@@ -61,17 +61,18 @@ sfn = lambda needle, name, obj: name and needle in name
 %apropos -s sfn One 
 # handle -s switch, using anonymous fn (evaluated)
 %apropos -s "lambda needle, name, obj: name and needle in name" one 
+
 # evaluate needle using python builtins
-%apvalue -e (1,2)
+%apobj (1,2)
 # evaluate needle using names from user ns.
-%apvalue -e gsn.array([1,2]) 
+%apobj gsn.array([1,2]) 
 
 ##############################
 # all magic fns
 %apname One
 %apvalue One
 %apvalue "The one"
-%apvalue -e (1,2,3)
+%apobj (1,2)
 %apdoc One
 %apname_regex ^[Oo]ne
 %apvalue_regex ^[Oo]ne
