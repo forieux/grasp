@@ -392,7 +392,7 @@ class AproposTest(unittest.TestCase):
                                          Composite(None)))
 
 def test():
-    suite = unittest.defaultTestLoader.loadTestsFromName(__file__[:-3])
+    suite = unittest.defaultTestLoader.loadTestsFromName('grasp.test')
     unittest.TextTestRunner().run(suite)
 
 if type(__builtins__) is type({}):
