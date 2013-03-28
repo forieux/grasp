@@ -417,35 +417,34 @@ def _apropos(needle, haystack, haystack_name,
     object.
 
     """
-    def search_internal(haystack, haystack_name, full_name, depth):
-        '''Free variable: needle, search_types'''
-        # TODO -- figure out WTF is going on with unicode strings here.
-        # for now, just skip them.
-        try: 
-            if search(needle, haystack_name, haystack):
-                found.append(full_name)
-        except (UnicodeDecodeError, UnicodeEncodeError):
-            if print_warning[0]:
-                print "Unicode string problems at", full_name
-                print_warning[0] = False
-
-        # break apart if obj is not already searched
-        if type(haystack) in search_types \
-                and (not max_depth or depth < max_depth) \
-                and id(haystack) not in searched_ids:
-            # Prevent loops with circular references by setting this
-            # _before_ descending into sub-objects
-            searched_ids.append(id(haystack))
-
-            for hay, hay_name, hay_access in introspect(haystack, **kw):
-                search_internal(hay, hay_name, full_name + hay_access, depth+1)
-
-    print_warning = [True]
+    # To get shortest path to access whatever we find, use breadth first search.
+    search_types = apropos_dict_types + apropos_list_types + apropos_instance_types
+    print_warning = True
     searched_ids = []
     found = []
-    search_types = apropos_dict_types + apropos_list_types + apropos_instance_types
+    # queue is a list of tuples, where each tuple is:
+    # (object_to_search, name_of_object, full_path_to_object, depth_of_object)
+    queue = [(haystack, haystack_name, haystack_name, 0)]
+    while queue:
+        obj, obj_name, full_name, depth = queue.pop(0)
+        
+        ## Examine present object
+        try: 
+            if search(needle, obj_name, obj):
+                found.append(full_name)
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            if print_warning:
+                print "Unicode string problems at", full_name
+                print_warning = False
 
-    search_internal(haystack, haystack_name, haystack_name, 0)
+        ## Queue children
+        if (type(obj) in search_types 
+            and (not max_depth or depth < max_depth) 
+            and id(obj) not in searched_ids):
+            
+            searched_ids.append(id(obj))
+            for child, child_name, child_access in introspect(obj, **kw):
+                queue.append((child, child_name, full_name + child_access, depth+1))
     return found
 
 def introspect(obj, **kw):
