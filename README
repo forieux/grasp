@@ -18,6 +18,13 @@ There are basically three functions provided:
  * rtype -- recursive type, deep object inspection
  * apropos -- deep search for things with a given name, value, etc.
 
+You can find code and dowloads at the Launchpad page or the PyPI page
+
+http://launchpad.net/grasp
+http://pypi.python.org/pypi/grasp/
+
+Written and maintained by Greg Novak <greg.novak@gmail.com>
+
 Introduction
 ============
 
