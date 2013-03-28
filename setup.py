@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='grasp',
-    version='0.3.0dev',
+    version='0.3.0',
     license='LICENSE',
     author='Greg Novak',
     author_email='greg.novak@gmail.com',
