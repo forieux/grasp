@@ -240,10 +240,6 @@ def search_value(needle, name, obj):
     #
     # TODO What I really want to do is match the container if none of
     # its contents matched.
-    # 
-    # if the needle is a string, match against the string
-    # representation of the object.  If it's not a string, just test
-    # for equality.
     if type(obj) not in (types.TupleType, types.ListType,
                          types.DictType):
         return needle in str(obj)
