@@ -100,7 +100,7 @@ Using the one from the user's namespace."""
         return grasp.apropos_name(*aa, **kw)
 
     @IPython.core.magic.line_magic
-    def apname_regex(line):
+    def apname_regex(self, line):
         """%apname_regex [-d <max_depth>] <needle> [haystack]
 
         Search for objects whose name matches regex "needle".  Return
@@ -114,10 +114,10 @@ Using the one from the user's namespace."""
 
         """
         aa, kw = self.parse_apropos_args(line)
-        grasp.apropos_name_regexp(*aa, **kw)
+        return grasp.apropos_name_regexp(*aa, **kw)
 
     @IPython.core.magic.line_magic
-    def apvalue(line):
+    def apvalue(self, line):
         """%apvalue [-d <max_depth>] <needle> [haystack]
 
         Search for objects whose string representation contains
@@ -131,10 +131,10 @@ Using the one from the user's namespace."""
 
         """
         aa, kw = self.parse_apropos_args(line)
-        grasp.apropos_value(*aa, **kw)
+        return grasp.apropos_value(*aa, **kw)
 
     @IPython.core.magic.line_magic
-    def apvalue_regex(line):
+    def apvalue_regex(self, line):
         """%apvalue_regex [-d <max_depth>] <needle> [haystack]
 
         Search for objects whose value matches regex "needle".  Return
@@ -148,10 +148,10 @@ Using the one from the user's namespace."""
 
         """
         aa, kw = self.parse_apropos_args(line)
-        grasp.apropos_value_regexp(*aa, **kw)
+        return grasp.apropos_value_regexp(*aa, **kw)
 
     @IPython.core.magic.line_magic
-    def apdoc(line):
+    def apdoc(self, line):
         """%apdoc [-d <max_depth>] <needle> [haystack]
 
         Search for objects whose docstring contains "needle".  Return
@@ -165,10 +165,10 @@ Using the one from the user's namespace."""
 
         """
         aa, kw = self.parse_apropos_args(line)
-        grasp.apropos_doc(*aa, **kw)
+        return grasp.apropos_doc(*aa, **kw)
 
     @IPython.core.magic.line_magic
-    def apdoc_regex(line):
+    def apdoc_regex(self, line):
         """%apdoc_regex [-d <max_depth>] <needle> [haystack]
 
         Search for objects whose docstring matches regex "needle".
@@ -182,7 +182,7 @@ Using the one from the user's namespace."""
 
         """
         aa, kw = self.parse_apropos_args(line)
-        grasp.apropos_doc_regexp(*aa, **kw)
+        return grasp.apropos_doc_regexp(*aa, **kw)
 
 @IPython.core.magic.magics_class
 class IntrospectionMagics(IPython.core.magic.Magics):
