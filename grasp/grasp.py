@@ -240,8 +240,11 @@ def search_value(needle, name, obj):
 
 def search_doc(needle, name, obj):
     """Match if needle is contained in the docstring of obj"""
-    return hasattr(obj, '__doc__') and obj.__doc__ \
-           and needle in obj.__doc__
+    return (hasattr(obj, '__doc__') and 
+            # Some functions have __doc__ attributes that appear to be
+            # functions... Only check ones that are strings
+            type(obj.__doc__) in types.StringTypes
+            and needle in obj.__doc__)
     
 def search_name_regexp(needle, name, obj):
     """Match if regexp needle matches name"""
@@ -255,9 +258,11 @@ def search_value_regexp(needle, name, obj):
 
 def search_doc_regexp(needle, name, obj):
     """Match if regexp needle matches the docstring of obj"""
-    return hasattr(obj, '__doc__') \
-           and obj.__doc__ \
-           and re.search(needle, obj.__doc__)
+    return (hasattr(obj, '__doc__') 
+            # Some functions have __doc__ attributes that appear to be
+            # functions... Only check ones that are strings        
+            and type(obj.__doc__) in types.StringTypes 
+            and re.search(needle, obj.__doc__))
 
 ##############################
 ## Apropos interface: commonly use cases with convenient syntax
