@@ -1,0 +1,83 @@
+# These are the things that I want to type at the interactive prompt
+# to exercise all functionality of the magic commands.  I could
+# probably type 'run test_magic' at the ipython prompt, but for now
+# I'm just copying and pasting them in.  Then I'm absolutely sure that
+# it's the same that a user would experience.
+
+##############################
+# rtype
+import numpy as gsn
+# fetch name from user namespace
+zz = [1,2,3]
+%rtype zz
+# handle arrays
+zz = gsn.array([1,2,3])
+%rtype zz
+# Eval arg w/ python builtins
+%rtype [1,2,3]
+# eval arg using names from user namespace
+%rtype gsn.array([1,2,3])
+# handle -m switch
+%rtype -m 5 [1,2,3.3,4]
+%rtype -m 3 [1,2,3.3,4]
+
+##############################
+# gist
+import numpy as gsn
+# fetch name from user namespace
+zz = [1,2,3]
+%gist zz
+# handle arrays
+zz = gsn.array([1,2,3])
+%gist zz
+# eval arg using python builtins
+%gist [1,2,3]
+# eval arg using names from user namespace
+%gist gsn.array([1,2,3])
+# handle -v switch
+%gist -v [1,2,3.3,4]
+
+
+##############################
+# apropos
+import numpy as gsn
+import grasp as jey
+sfn = lambda needle, name, obj: name and needle in name
+# search for literal string, default haystack
+%apropos One
+# search for literal string, provide haystack as name in user ns
+%apropos One gsn
+# search for literal string, eval haystack using names in user ns
+%apropos One [gsn, jey]
+# search for quoted string
+%apdoc "This function" 
+# search for quoted string, eval haystack using names in user ns
+%apdoc "This function" [gsn, jey]
+# handle -d switch
+%apropos -d 5 One 
+# handle -s switch, using fn name from grasp module
+%apropos -s search_name One 
+# handle -s switch, using fn name from user ns
+%apropos -s sfn One 
+# handle -s switch, using anonymous fn (evaluated)
+%apropos -s "lambda needle, name, obj: name and needle in name" one 
+# evaluate needle using python builtins
+%apvalue -e (1,2)
+# evaluate needle using names from user ns.
+%apvalue -e gsn.array([1,2]) 
+
+##############################
+# all magic fns
+%apname One
+%apvalue One
+%apvalue "The one"
+%apvalue -e (1,2,3)
+%apdoc One
+%apname_regex ^[Oo]ne
+%apvalue_regex ^[Oo]ne
+%apdoc_regex ^[Oo]ne
+
+%dreload grasp
+# remove from present namespace, make sure it's imported first
+del grasp
+%dreload grasp
