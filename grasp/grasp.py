@@ -15,7 +15,7 @@ except ImportError: numpy = False
 # installed but you're running under standard python, you get a name
 # error (from get_ipython() function failing to resolve)
 try: import magic
-except (ImportError, NameError): pass
+except ImportError: pass
 
 # This is just to test for a poorly written __cmp__ function in
 # distutils.version.LooseVersion.  Importing distutils should always work but I don't want to give the impression that we need it if something goes wrong.

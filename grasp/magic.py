@@ -430,8 +430,26 @@ class ReloadMagics(IPython.core.magic.Magics):
         # this is now known to be in the user ns, so reload away.
         dreload(self.shell.user_ns[line], dreload_excludes)
 
-# Load the magic commands into ipython            
-ip = get_ipython()
-ip.register_magics(IntrospectionMagics)
-ip.register_magics(AproposMagics)
-ip.register_magics(ReloadMagics)
+# Two functions to load and unload the extension via ipython's
+# %load_ext magic command
+def load_ipython_extension(ipython):
+    """Called by %load_ext magic command to load this extension"""
+    ipython.register_magics(IntrospectionMagics)
+    ipython.register_magics(AproposMagics)
+    ipython.register_magics(ReloadMagics)
+
+def unload_ipython_extension(ipython):
+    """Called by %unload_ext magic command to remove this extension"""
+    pass
+
+## If this is imported, and I believe seem to be running under
+## IPython, try to load the magic commands.  This should probably go
+## away in favor of the cleaner %load_ext technique
+try:
+    ip = get_ipython()
+    ip.register_magics(IntrospectionMagics)
+    ip.register_magics(AproposMagics)
+    ip.register_magics(ReloadMagics)
+except NameError:
+    # if the reference to get_ipython doesn't resolve
+    pass
