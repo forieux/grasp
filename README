@@ -209,42 +209,66 @@ results a little to find what you want.
 Installation
 ============
 
-Installation is the standard distutils routine:
+There are several possible installation techniques listed here in
+rough order of preference:
 
-python setup.py install 
+1) Using pip (https://pypi.python.org/pypi/pip):
 
-To install in the user-specific Python directory:
+   To install system-wide:
 
-python setup.py install --user
+   pip install grasp
 
-To install somewhere under the user's home directory:
+   To install in the user-specific Python directory
+   (~/Library/Python/2.7/lib/python/site-packages or similar on OS X):
 
-python setup.py install --home=~/some/place
+   pip install --user grasp
 
-To use grasp just do 
-import grasp
+2) Using easy_install (https://pypi.python.org/pypi/distribute):
 
-If IPython is running, grasp will register the magic commands and
-you'll see them when you type
-%lsmagic
+   The same as above, except substitute easy_install for pip
 
-There are two ways to load grasp automatically when IPython is
-started.  
+3) Using distutils (included with Python)
 
-1. Put a file containing "import grasp" in the directory
-   ~/.ipython/profile_default/startup/
+   This is the standard distutils routine: download the code, extract
+   from the archive, and install system-wide via something like
+   (adjusting links and version numbers as appropriate):
 
-2. Open or create the file
-   ~/.ipython/profile_default/ipython_config.py 
+   wget https://pypi.python.org/packages/source/g/grasp/grasp-0.3.0.tar.gz
+   tar xzf grasp-0.3.0.tar.gz
+   cd grasp-0.3.0
+   python setup.py install 
+
+   If you want to install into a user directory, the last line becomes
+   python setup.py install --user
+
+   To install somewhere under the user's home directory:
+   python setup.py install --home=~/some/place   
+
+
+Usage
+=====
+
+To use grasp from IPython, type
+
+  %load_ext grasp
+
+There are two ways to ensure that grasp is loaded automatically
+when IPython starts:
+
+1. Open or create the file ~/.ipython/profile_default/ipython_config.py 
    and add this line to it:
+
    c.InteractiveShellApp.exec_lines = ['import grasp']
 
-grasp automatically tries to register the magic commands with IPython,
-although it does not complain if IPython is not found.  You should see
-the magic commands listed when you type %lsmagic.
+2. Put the following line into a file with the extension .ipy in the
+   directory ~/.ipython/profile_default/startup/
 
-I have used this package on Gnu/Linux and OS X.  I have no idea how/if
-it works on Windows.
+   %load_ext grasp
+
+I have used this package on Gnu/Linux and OS X.  I have not tested it
+on Windows.  It should work fine -- the main difference will be
+getting it installed.
+
 
 Non-IPython Environments
 ========================
@@ -254,8 +278,8 @@ which the magic functions are based directly.  The translation between
 the magic command arguments given above and the arguments of the
 Python functions should be straightforward.  The magic commands
 sometimes have shorter, more cryptic names with a view toward saving
-keystrokes during heavy interactive use.  It will look something like
-this:
+keystrokes during heavy interactive use.  In plain Python it will look
+something like this:
 
 >>> import grasp
 >>> grasp.gist([1,2,3], verbose=True)
