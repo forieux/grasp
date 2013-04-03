@@ -258,7 +258,7 @@ when IPython starts:
 1. Open or create the file ~/.ipython/profile_default/ipython_config.py 
    and add this line to it:
 
-   c.InteractiveShellApp.exec_lines = ['import grasp']
+   c.InteractiveShellApp.extensions = ['grasp']
 
 2. Put the following line into a file with the extension .ipy in the
    directory ~/.ipython/profile_default/startup/
