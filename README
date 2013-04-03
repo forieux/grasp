@@ -297,6 +297,20 @@ atts = grasp.gist(object)
 for att in atts['int']:
     setattr(object, att, 42)
 
+License
+=======
+
+I've released the code under the CC0 licence, essentially putting it
+into the public domain.  You can do whatever you want with it.  If you
+incorporate grasp into another project, I ask for the courtesy of two
+favors:
+
+1) Include an appropriate acknowledgement of the fact that your
+project uses grasp.
+
+2) Let me know (greg.novak@gmail.com) so that I can link to your
+project from the grasp web site.
+
 Acknowledgements
 ================
 
