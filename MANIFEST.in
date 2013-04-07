@@ -1,1 +1,1 @@
-include grasp/test/*.ipy
+include CHANGES LICENSE grasp/test/*.ipy
