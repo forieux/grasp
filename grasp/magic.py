@@ -1,4 +1,4 @@
-import types
+import types, bisect
 import IPython
 import grasp
 
@@ -434,17 +434,39 @@ class ReloadMagics(IPython.core.magic.Magics):
 class ClearMemoryMagics(IPython.core.magic.Magics):
 
     @IPython.core.magic.line_magic
-    def clear_mem(self, line):
-        return
-
-    def clearout(self, __IP=None, upto=None):
+    def clear_out(self, line):
+        # This function does arg parsing 
         """Clear the IPython Out cache, possibly only up to a given entry.
+
+        clear_mem [-q] [upto]
+        
+        upto: optional integer giving the entry up to which the Out[]
+        list should be cleared.
+
+        -q : quiet.  Suppress printing of info about what happened.
+        
         Source: Robert Kern
         http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
 
         """
-        return 
-        ns = __IP.ns_table['user_local']
+        opts, args = self.parse_options(line, 'q', mode='list')
+        if len(args)==0: 
+            self._clear_out(verbose='q' not in opts)
+        elif len(args) == 1: 
+            self._clear_out(int(args[0]), verbose='q' not in opts)
+        else: 
+            raise ValueError
+            
+    def _clear_out(self, upto=None, verbose=True):
+        """Clear the IPython Out cache, possibly only up to a given entry.
+        Source: Robert Kern
+
+        This function actually does the work.
+
+        http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
+
+        """
+        ns = self.shell.ns_table['user_local']
         Out = ns.get('Out', None)
         if Out is not None:
             keys = sorted(Out)
@@ -469,7 +491,8 @@ class ClearMemoryMagics(IPython.core.magic.Magics):
             _key = '_%s' % key
             del ns[_key]
 
-        print 'Remove Out entries: %s' % keys
+        if verbose:
+            print 'Remove Out entries: %s' % keys
 
 # Two functions to load and unload the extension via ipython's
 # %load_ext magic command
@@ -478,6 +501,7 @@ def load_ipython_extension(ipython):
     ipython.register_magics(IntrospectionMagics)
     ipython.register_magics(AproposMagics)
     ipython.register_magics(ReloadMagics)
+    ipython.register_magics(ClearMemoryMagics)
 
 def unload_ipython_extension(ipython):
     """Called by %unload_ext magic command to remove this extension"""

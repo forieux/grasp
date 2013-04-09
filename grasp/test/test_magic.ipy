@@ -78,7 +78,14 @@ sfn = lambda needle, name, obj: name and needle in name
 %apvalue_regex ^[Oo]ne
 %apdoc_regex ^[Oo]ne
 
+##############################
 %dreload grasp
 # remove from present namespace, make sure it's imported first
 del grasp
 %dreload grasp
+
+##############################
+%clear_out 5
+%clear_out -q 3
+%clear_out
+%clear_out -q
