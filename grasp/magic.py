@@ -430,38 +430,46 @@ class ReloadMagics(IPython.core.magic.Magics):
         # this is now known to be in the user ns, so reload away.
         dreload(self.shell.user_ns[line], dreload_excludes)
 
-def clearout(__IP, upto=None):
-    """Clear the IPython Out cache, possibly only up to a given entry.
-    Source: Robert Kern
-    http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
+@IPython.core.magic.magics_class
+class ClearMemoryMagics(IPython.core.magic.Magics):
 
-    """
-    ns = __IP.ns_table['user_local']
-    Out = ns.get('Out', None)
-    if Out is not None:
-        keys = sorted(Out)
-        if upto is not None:
-            keys = keys[:bisect.bisect_right(keys, upto)]
+    @IPython.core.magic.line_magic
+    def clear_mem(self, line):
+        return
+
+    def clearout(self, __IP=None, upto=None):
+        """Clear the IPython Out cache, possibly only up to a given entry.
+        Source: Robert Kern
+        http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
+
+        """
+        return 
+        ns = __IP.ns_table['user_local']
+        Out = ns.get('Out', None)
+        if Out is not None:
+            keys = sorted(Out)
+            if upto is not None:
+                keys = keys[:bisect.bisect_right(keys, upto)]
+            for key in keys:
+                del Out[key]
+        else:
+            # No cache.
+            # Still might have the _NN variables sitting around.
+            keys = []
+            for var in ns:
+                if var.startswith('_'):
+                    try:
+                        nn = int(var[1:])
+                    except ValueError:
+                        continue
+                    if upto is not None and nn < upto:
+                        keys.append(nn)
+
         for key in keys:
-            del Out[key]
-    else:
-        # No cache.
-        # Still might have the _NN variables sitting around.
-        keys = []
-        for var in ns:
-            if var.startswith('_'):
-                try:
-                    nn = int(var[1:])
-                except ValueError:
-                    continue
-                if upto is not None and nn < upto:
-                    keys.append(nn)
+            _key = '_%s' % key
+            del ns[_key]
 
-    for key in keys:
-        _key = '_%s' % key
-        del ns[_key]
-
-    print 'Remove Out entries: %s' % keys
+        print 'Remove Out entries: %s' % keys
 
 # Two functions to load and unload the extension via ipython's
 # %load_ext magic command
