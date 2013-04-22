@@ -4,7 +4,11 @@
 # Taken
 # grok sense gist pygist fathom
 
-import types, re
+import sys, types, re
+
+# Python 2.4 doesn't have functools
+if sys.version_info >= (2,5):
+    import functools
 
 # Handle numpy types if numpy is available.
 try: import numpy
@@ -79,7 +83,11 @@ class sstr(object):
 
 def every(args): 
     """Return True if all elements of args are True."""
-    return reduce(lambda x,y: x and y, args, True)
+    # Python 2.5 has the functools module, but reduce isn't in it.
+    if sys.version_info >= (2,6):
+        return functools.reduce(lambda x,y: x and y, args, True)
+    else:
+        return reduce(lambda x,y: x and y, args, True)
 
 ##################################################
 ## Introspection
@@ -112,7 +120,7 @@ def gist(obj, verbose=False, pretty=True):
             except: attr = Exception
             info.append((name, type(attr)))
 
-    types = sorted(set([el[1] for el in info]))
+    types = sorted(set([el[1] for el in info]), key=str)
     # TODO result used to be a list, not a dict.  Do I prefer that
     # since I'll have deterministic ordering in printouts?  Might make
     # programmatic processing of output worse, but I don't do that
