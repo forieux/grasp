@@ -15,7 +15,7 @@ except ImportError: numpy = False
 # installed but you're running under standard python, you get a name
 # error (from get_ipython() function failing to resolve)
 try: import magic
-except ImportError: pass
+except (ImportError, SyntaxError): pass
 
 # This is just to test for a poorly written __cmp__ function in
 # distutils.version.LooseVersion.  Importing distutils should always work but I don't want to give the impression that we need it if something goes wrong.
@@ -283,7 +283,7 @@ def search_equal(needle, name, obj):
 
         try: 
             result = numpy.all(needle==obj)
-        except Exception as e:
+        except Exception:
             if verbose: 
                 print "Exception encountered in test for equality, assuming unequal..."
             result = False
@@ -293,7 +293,7 @@ def search_equal(needle, name, obj):
     # evidently not equal.
     try: 
         result = (needle == obj)
-    except Exception as e:
+    except Exception:
         if verbose: 
             print "Exception encountered in test for equality, assuming unequal..."
         result = False

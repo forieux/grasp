@@ -8,7 +8,7 @@ if not hasattr(unittest, 'skipIf'):
             """Tests require either the Python 2.7 or later version of unittest or
             the unittest2 module."""
 
-import tempfile
+import sys, tempfile
 import grasp
 from grasp import *
 
@@ -45,15 +45,22 @@ class IntrospectionTest(unittest.TestCase):
         self.excludes = [types.BufferType, types.CodeType,
                          types.DictProxyType, types.EllipsisType,
                          types.FrameType, types.GeneratorType,
-                         types.GetSetDescriptorType,
-                         types.MemberDescriptorType,
                          types.NotImplementedType,
-                         types.TracebackType,
-                         # Not sure why this isn't showing up under exceptions
+                         types.TracebackType ]
 
-                         GeneratorExit,
-                         # TODO -- do these belong here?
-                         bytearray, memoryview]
+        if sys.version_info >= (2,7):
+            # TODO -- Does memoryview belong here?
+            self.excludes += [memoryview]
+
+        if sys.version_info >= (2,6):
+            # TODO -- Does bytearray belong here?
+            self.excludes += [bytearray]
+
+        if sys.version_info >= (2,5):
+            self.excludes += [ types.GetSetDescriptorType,
+                               types.MemberDescriptorType, 
+                               # Not sure why this doesn't show up under exceptions
+                               GeneratorExit]
 
         # These are the ones in types module
         self.objs = [True, # Boolean,
@@ -98,8 +105,11 @@ class IntrospectionTest(unittest.TestCase):
                       Exception(),  # Exception                 
                       KeyboardInterrupt(),  
                       SystemExit(),  
-                      BaseException(),  
                       ]
+
+        if sys.version_info >= (2,5):
+            self.objs += [ BaseException() ]
+        
 
         # These I found in __builtins__ but can't be instantiated
         self.excludes += [basestring]

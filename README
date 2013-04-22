@@ -297,6 +297,16 @@ atts = grasp.gist(object)
 for att in atts['int']:
     setattr(object, att, 42)
 
+Version Information
+===================
+
+Grasp passes all tests with Python versions 2.4 and higher.
+
+The IPython magic commands work for versions of IPython with the
+decorators IPython.core.magic.magics_class and
+IPython.core.magic.line_magic.  It looks like these were introduced in
+IPython version 0.13  
+
 License
 =======
 
