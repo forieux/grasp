@@ -43,19 +43,34 @@ class IntrospectionTest(unittest.TestCase):
         # Python
         
         self.excludes = [types.BufferType, types.CodeType,
-                         types.DictProxyType, types.EllipsisType,
+                         types.EllipsisType,
                          types.FrameType, types.GeneratorType,
                          types.NotImplementedType,
                          types.TracebackType ]
 
+        # Added in Python 3.3
+        if sys.version_info >= (3,3):
+            self.excludes += [types.SimpleNamespace,
+                              types.MappingProxyType,
+                              __loader__]
+
+        # Added in Python 3
+        if sys.version_info > (3,):
+            self.excludes += [bytes, filter, slice, zip, map]
+
+        # Removed in Python 3
+        if sys.version_info < (3,):
+            self.excludes += [types.DictProxyType]
+
+        # Added in Python 2.7
         if sys.version_info >= (2,7):
-            # TODO -- Does memoryview belong here?
             self.excludes += [memoryview]
 
+        # Added in Python 2.6
         if sys.version_info >= (2,6):
-            # TODO -- Does bytearray belong here?
             self.excludes += [bytearray]
 
+        # Added in Python 2.5
         if sys.version_info >= (2,5):
             self.excludes += [ types.GetSetDescriptorType,
                                types.MemberDescriptorType, 
@@ -66,7 +81,6 @@ class IntrospectionTest(unittest.TestCase):
         self.objs = [True, # Boolean,
                      repr, # built-in function
                      1j, # Complex
-                     types.ClassType('foo', (object,), {}), # Class
                      dict(a=1), # Dictionary
                      self.tf,    # File
                      1.1,  # Float
@@ -82,7 +96,6 @@ class IntrospectionTest(unittest.TestCase):
                      unittest, # Module
                      None, # None
                      object(), # Object
-                     types.SliceType(1),  # Slice
                      'blah', # String
                      (1,2),  # Tuple
                      int, # type
@@ -93,6 +106,12 @@ class IntrospectionTest(unittest.TestCase):
                      xrange(3), # xrange
                      ]
 
+        if sys.version_info < (3,):
+            self.objs += [types.ClassType('foo', (object,), {}), # Class
+                          types.SliceType(1),  # Slice
+            ] 
+
+        
         # These I found in __builtins__
         self.objs += [super(test_new_obj),  # Super
                       staticmethod(func), # staticmethod                
@@ -162,19 +181,23 @@ class IntrospectionTest(unittest.TestCase):
     def test_type_coverage(self):        
         # Check to see if any types aren't covered        
         covered_types = self.excludes + [type(obj) for obj in self.objs]
-        els = __builtins__.values() \
-              + [getattr(types, name) for name in dir(types)] 
-        all_types = [el for el in els if type(el) is type]
 
-        is_covered = [t in covered_types
-                     # don't bother explicitly listing all exceptions
-                     or issubclass(t, Exception)
-                     # TODO -- something weird is going on with class types
-                     or t is types.ClassType
-                     # TODO -- strange -- reversed is in the list of objects
-                     or t is reversed
-                     for t in all_types]
-        self.assertTrue(every(is_covered))
+        # Keep names of objects to make finding new types easier.
+        names_and_vals = __builtins__.items() \
+                         + [(name, getattr(types, name)) for name in dir(types)] 
+        all_types = [(name, val) for name, val in names_and_vals if type(val) is type]
+        
+        uncovered = [(name, val, type(val))
+                      for name, val in all_types
+                      if not (type(val) in covered_types
+                              # don't bother explicitly listing all exceptions
+                              or issubclass(type(val), Exception)
+                              # TODO -- something weird is going on with class types
+                              or type(val) is types.ClassType
+                              # TODO -- strange -- reversed is in the list of objects
+                              or type(val) is reversed)]
+
+        self.assertEqual(len(uncovered), 0)
 
     def test_gist(self):
         for el in self.objs:

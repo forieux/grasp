@@ -51,7 +51,9 @@ verbose = False
 
 apropos_dict_types = [types.DictType]
 apropos_list_types = [types.ListType, types.TupleType]
-apropos_instance_types = [types.InstanceType, types.ModuleType]
+apropos_instance_types = [types.ModuleType]
+if sys.version_info < (3,):
+    apropos_instance_types += [types.InstanceType]
 
 ##################################################
 # Information about types for recursive_types() function.
@@ -88,6 +90,19 @@ def every(args):
         return functools.reduce(lambda x,y: x and y, args, True)
     else:
         return reduce(lambda x,y: x and y, args, True)
+
+def isstring(obj):
+    """Test if an object is a string for different python versions."""
+    # Early Python only had one string type
+    # if type(obj) is str
+    # Middle-aged Python had several:
+    # if type(obj) in types.StringTypes
+    # Modern python has one again
+    # if type(obj) is str
+    if sys.version_info < (3,):
+        return type(obj) in types.StringTypes
+    else:
+        return type(obj) is str
 
 ##################################################
 ## Introspection
@@ -309,11 +324,11 @@ def search_equal(needle, name, obj):
 
 def search_doc(needle, name, obj):
     """Match if needle is contained in the docstring of obj"""
+    # Some functions have __doc__ attributes that appear to be
+    # functions... Only check ones that are strings
     return (hasattr(obj, '__doc__') and 
-            # Some functions have __doc__ attributes that appear to be
-            # functions... Only check ones that are strings
-            type(obj.__doc__) in types.StringTypes
-            and needle in obj.__doc__)
+              isstring(obj.__doc__)
+              and needle in obj.__doc__)
     
 def search_name_regexp(needle, name, obj):
     """Match if regexp needle matches name"""
@@ -330,7 +345,7 @@ def search_doc_regexp(needle, name, obj):
     return (hasattr(obj, '__doc__') 
             # Some functions have __doc__ attributes that appear to be
             # functions... Only check ones that are strings        
-            and type(obj.__doc__) in types.StringTypes 
+            and isstring(obj.__doc__)
             and re.search(needle, obj.__doc__))
 
 ##############################
@@ -500,7 +515,7 @@ class DictIntrospector (Introspector):
         # return tuple of obj, name, access_name
         k = self.iter.next()
         # TODO -- completely skip non-string key entries
-        while type(k) is not types.StringType \
+        while not isstring(k) \
               or (self.exclude and k.startswith(self.exclude)):
             k = self.iter.next()
         return self.dict[k], k, '[' + k + ']'

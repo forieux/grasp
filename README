@@ -300,12 +300,20 @@ for att in atts['int']:
 Version Information
 ===================
 
-Grasp passes all tests with Python versions 2.4 and higher.
+Grasp passes all tests with Python 2.4 through 2.7.  
+
+When translated to Python 3 via the 2to3 script, Grasp passes all
+tests on Python 3.1, 3.2, and 3.3.  Strictly speaking, for 3.1 there
+are errors with the unittest.expectedFailure decorator, but that seems
+to be a problem with unittest, not Grasp.  
 
 The IPython magic commands work for versions of IPython with the
 decorators IPython.core.magic.magics_class and
 IPython.core.magic.line_magic.  It looks like these were introduced in
-IPython version 0.13  
+IPython version 0.13.  Making it work with older versions of IPython
+would only involve registering the magic commands in a different way,
+which is probably not difficult, but I see no compelling reason to do
+it. 
 
 License
 =======
