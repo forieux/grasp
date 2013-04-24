@@ -1,3 +1,6 @@
 MANIFEST
 build
 dist
+grasp.egg-info
+grasp/__pycache__
+grasp/test/__pycache__
