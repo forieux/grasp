@@ -2,7 +2,7 @@ import sys
 from distutils.core import setup
 
 args = dict(name='grasp',
-            version='0.3.1',
+            version='0.3.2',
             license='Creative Commons CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
             author='Greg Novak',
             author_email='greg.novak@gmail.com',

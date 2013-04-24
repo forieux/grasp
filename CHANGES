@@ -1,3 +1,4 @@
+v0.3.2, 24 Apr 2013 -- Added Python 3 support.
 v0.3.1,  3 Apr 2013 -- Allow use as IPython extension; improved install
                        instructions
 v0.3.0, 27 Mar 2013 -- Added IPython Magic commands
