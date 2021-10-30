@@ -3,10 +3,6 @@ import sys
 import types
 from functools import reduce
 
-# Python 2.4 doesn't have functools
-if sys.version_info >= (2, 5):
-    import functools
-
 # Handle numpy types if numpy is available.
 try:
     import numpy
@@ -55,8 +51,6 @@ verbose = False
 apropos_dict_types = [dict]
 apropos_list_types = [list, tuple]
 apropos_instance_types = [types.ModuleType]
-if sys.version_info < (3,):
-    apropos_instance_types += [types.InstanceType]
 
 ##################################################
 # Information about types for recursive_types() function.
@@ -107,11 +101,7 @@ class sstr(object):
 
 def every(args):
     """Return True if all elements of args are True."""
-    # Python 2.5 has the functools module, but reduce isn't in it.
-    if sys.version_info >= (2, 6):
-        return functools.reduce(lambda x, y: x and y, args, True)
-    else:
-        return reduce(lambda x, y: x and y, args, True)
+    return reduce(lambda x, y: x and y, args, True)
 
 
 def isstring(obj):
@@ -122,10 +112,7 @@ def isstring(obj):
     # if type(obj) in types.StringTypes
     # Modern python has one again
     # if type(obj) is str
-    if sys.version_info < (3,):
-        return type(obj) in (str,)
-    else:
-        return type(obj) is str
+    return type(obj) is str
 
 
 ##################################################
