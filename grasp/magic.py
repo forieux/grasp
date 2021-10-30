@@ -1,16 +1,20 @@
-import types, bisect
+import bisect
+import types
+
 import IPython
-import grasp
+
+from . import grasp
 
 # deepreloads of IPython cause a crash, so add it to the list of
 # excludes for deep reloads
-dreload_excludes = ['sys', 'os.path', '__builtin__', '__main__', 'IPython']
+dreload_excludes = ["sys", "os.path", "__builtin__", "__main__", "IPython"]
 
 ##############################
 ## Provide IPython magic commands
 @IPython.core.magic.magics_class
 class AproposMagics(IPython.core.magic.Magics):
     """Magic functions for all of the various apropos possibilities."""
+
     def fetch_or_eval(self, str, nss=tuple()):
         """Try to fetch a name from a namespace.  If that fails, evaluate the
         object.  The order of precedence is: 1) name in the user
@@ -41,13 +45,13 @@ class AproposMagics(IPython.core.magic.Magics):
         """Parse arguments for all of the apropos* functions"""
         # Possible args I'm ignoring for now:
         # haystack_name, name
-        # 
+        #
         # Using mode='list' here makes it easier to be independent of
         # extraneous whitespace.
-        opts, arg_strings = self.parse_options(line, 'd:s:', mode='list')
+        opts, arg_strings = self.parse_options(line, "d:s:", mode="list")
         kw = {}
-        if 'd' in opts: 
-            kw['max_depth'] = int(opts['d'])
+        if "d" in opts:
+            kw["max_depth"] = int(opts["d"])
 
         # It's only legel to provide a search function to apropos(),
         # but parse the option here to keep things centralized.  The
@@ -55,37 +59,37 @@ class AproposMagics(IPython.core.magic.Magics):
         # allowed, and the code will fail, complaining that the search
         # keyword arg was provided twice if the user gives a search
         # function anyway.
-        if 's' in opts:
-            kw['search'] = self.fetch_or_eval(opts['s'], [grasp])
+        if "s" in opts:
+            kw["search"] = self.fetch_or_eval(opts["s"], [grasp])
 
         # Would like to allow evaluation of the first arg (the needle)
         # as well as the second arg (the haystack).  However, it's
         # hard to see how to do this in a general way with nice
-        # syntax.  The possibilities I see are: 
-        # 
+        # syntax.  The possibilities I see are:
+        #
         # 1) require quoting so that getopt can split it.  This breaks
         # the illusion that you're just typing at a normal python
-        # prompt.  
+        # prompt.
         #
         # 2) Require the whole string to evaluate to a tuple that's
         # passed as args to apropos.  This is ok, commas come between
         # args anyway. However, the metaphor with magic commands is
         # more like the unix shell, where args are separated by
-        # spaces, not commas.  
-        # 
+        # spaces, not commas.
+        #
         # 3) Specify that the first arg be a string and do not allow
         # evaluation of it.  Since the code implementing the search
         # (grasp.apropos) expects it to be a string, this is "honest"
-        # to the underlying implmentation.  
+        # to the underlying implmentation.
         #
         # 4) Specify a keyword separator between them, like 'in', so
-        # that calls look like the following: 
+        # that calls look like the following:
         # %apropos name
         # %apropos name in IPython
         # %apvalue 1.1 in IPython
         # %apropos name in [IPython, matplotlib]
         # %apvalue 1.1 in [IPython, matplotlib]
-        # 
+        #
         # The problem with #4 this is that in could concievably appear
         # in the code to evaluate, being as it is a reserved word in
         # Python.  However, this seems unlikely, and if it does I can
@@ -93,11 +97,11 @@ class AproposMagics(IPython.core.magic.Magics):
         # have to pass it to getopts?) or b) try evaling all
         # possibilities, catching syntax exceptions.  The latter seems
         # a bit reckless.
-        # 
+        #
         # Actually, it's a bit of an advantage that in is a reserved
         # word, because then the user can't have variables named in
         # that would lead to ambiguous statements like "%apropos name
-        # in in" 
+        # in in"
         #
         # So, go with #4, asking the user to disambiguate if
         # necessary.  find index of keyword separating needle from
@@ -109,13 +113,13 @@ class AproposMagics(IPython.core.magic.Magics):
         # just giving it as a literal string there are exceptions.
         # That seems clumsy, too.
         #
-        # So now I'm leaning toward: 
+        # So now I'm leaning toward:
         #
         # 5) Force it to be a string.  Force it to be quoted if it has
         # spaces.  Allow it to be evaluated with a switch.  I think
         # this is fully unambiguous, and doens't need the 'in'
         # keyword.
-        # 
+        #
         # Now that 5) is implemented, I realize that search_value
         # starts to look dumb if it has conditionals for the type of
         # needle.  What I really want is another search function.
@@ -133,7 +137,7 @@ class AproposMagics(IPython.core.magic.Magics):
         # resolve into the grasp module namespace so the user can
         # easily get their hands on the two reasonable choices for
         # equality.
-        # 
+        #
         # arg will hold the positional args of apropos
         arg = [None, None]
         if eval_needle:
@@ -141,19 +145,19 @@ class AproposMagics(IPython.core.magic.Magics):
         else:
             arg[0] = arg_strings[0]
 
-        if len(arg_strings)==1: 
+        if len(arg_strings) == 1:
             # The user didn't provide something to search.  Calling
             # globals() here or in grasp.py doesn't make sense, so
-            # send in the user's namespace for haystack            
-            arg[1] = self.shell.user_ns                
+            # send in the user's namespace for haystack
+            arg[1] = self.shell.user_ns
         else:
             # User provided both needle and haystack
             # This may be an expression and therefore may have spaces
             # in it, so join them up into one string before evaling.
-            arg[1] = self.fetch_or_eval(' '.join(arg_strings[1:]))
+            arg[1] = self.fetch_or_eval(" ".join(arg_strings[1:]))
 
         return arg, kw
-    
+
     @IPython.core.magic.line_magic
     def apropos(self, line):
         """%apropos [-d <max_depth>] [-s <search_function>] <needle> [haystack]
@@ -300,8 +304,8 @@ class AproposMagics(IPython.core.magic.Magics):
         """
         aa, kw = self.parse_apropos_args(line, eval_needle=True)
         # provide a default for search function
-        if 'search' not in kw:
-            kw['search'] = grasp.search_equal
+        if "search" not in kw:
+            kw["search"] = grasp.search_equal
         return grasp.apropos(*aa, **kw)
 
     @IPython.core.magic.line_magic
@@ -320,6 +324,7 @@ class AproposMagics(IPython.core.magic.Magics):
         """
         aa, kw = self.parse_apropos_args(line)
         return grasp.apropos_doc_regexp(*aa, **kw)
+
 
 @IPython.core.magic.magics_class
 class IntrospectionMagics(IPython.core.magic.Magics):
@@ -352,18 +357,16 @@ class IntrospectionMagics(IPython.core.magic.Magics):
         # Also recognize this argument, but don't see why people will
         # want it for the magic command, so don't advertise it:
         # -u : 'ugly' output with standard strings (lots of extra quotes)
-        opts, arg = self.parse_options(line, 'vu')
+        opts, arg = self.parse_options(line, "vu")
         if arg in self.shell.user_ns:
             obj = self.shell.user_ns[arg]
         else:
             obj = eval(arg, self.shell.user_ns)
-        return grasp.gist(obj, 
-                          verbose='v' in opts, 
-                          pretty='u' not in opts)
+        return grasp.gist(obj, verbose="v" in opts, pretty="u" not in opts)
 
     @IPython.core.magic.line_magic
     def rtype(self, line):
-        """%rtype object 
+        """%rtype object
 
         Recursive type of object.  Return a list of strings concisely
         describing the object.
@@ -394,16 +397,17 @@ class IntrospectionMagics(IPython.core.magic.Magics):
         Out[5]: ['tuple of 3', 'ndarray of (2,) int64']
 
         """
-        opts, arg = self.parse_options(line, 'm:')
+        opts, arg = self.parse_options(line, "m:")
         kw = {}
-        if 'm' in opts: 
-            kw['max'] = int(opts['m'])
+        if "m" in opts:
+            kw["max"] = int(opts["m"])
         # if it's not in the user namespace, assume it's a literal object
         if arg in self.shell.user_ns:
             obj = self.shell.user_ns[arg]
         else:
             obj = eval(arg, self.shell.user_ns)
         return grasp.recursive_type(obj, **kw)
+
 
 @IPython.core.magic.magics_class
 class ReloadMagics(IPython.core.magic.Magics):
@@ -430,33 +434,33 @@ class ReloadMagics(IPython.core.magic.Magics):
         # this is now known to be in the user ns, so reload away.
         dreload(self.shell.user_ns[line], dreload_excludes)
 
+
 @IPython.core.magic.magics_class
 class ClearMemoryMagics(IPython.core.magic.Magics):
-
     @IPython.core.magic.line_magic
     def clear_out(self, line):
-        # This function does arg parsing 
+        # This function does arg parsing
         """Clear the IPython Out cache, possibly only up to a given entry.
 
         clear_mem [-q] [upto]
-        
+
         upto: optional integer giving the entry up to which the Out[]
         list should be cleared.
 
         -q : quiet.  Suppress printing of info about what happened.
-        
+
         Source: Robert Kern
         http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
 
         """
-        opts, args = self.parse_options(line, 'q', mode='list')
-        if len(args)==0: 
-            self._clear_out(verbose='q' not in opts)
-        elif len(args) == 1: 
-            self._clear_out(int(args[0]), verbose='q' not in opts)
-        else: 
+        opts, args = self.parse_options(line, "q", mode="list")
+        if len(args) == 0:
+            self._clear_out(verbose="q" not in opts)
+        elif len(args) == 1:
+            self._clear_out(int(args[0]), verbose="q" not in opts)
+        else:
             raise ValueError
-            
+
     def _clear_out(self, upto=None, verbose=True):
         """Clear the IPython Out cache, possibly only up to a given entry.
         Source: Robert Kern
@@ -466,12 +470,12 @@ class ClearMemoryMagics(IPython.core.magic.Magics):
         http://thread.gmane.org/gmane.comp.python.scientific.user/12160/focus=12198
 
         """
-        ns = self.shell.ns_table['user_local']
-        Out = ns.get('Out', None)
+        ns = self.shell.ns_table["user_local"]
+        Out = ns.get("Out", None)
         if Out is not None:
             keys = sorted(Out)
             if upto is not None:
-                keys = keys[:bisect.bisect_right(keys, upto)]
+                keys = keys[: bisect.bisect_right(keys, upto)]
             for key in keys:
                 del Out[key]
         else:
@@ -479,7 +483,7 @@ class ClearMemoryMagics(IPython.core.magic.Magics):
             # Still might have the _NN variables sitting around.
             keys = []
             for var in ns:
-                if var.startswith('_'):
+                if var.startswith("_"):
                     try:
                         nn = int(var[1:])
                     except ValueError:
@@ -488,11 +492,12 @@ class ClearMemoryMagics(IPython.core.magic.Magics):
                         keys.append(nn)
 
         for key in keys:
-            _key = '_%s' % key
+            _key = "_%s" % key
             del ns[_key]
 
         if verbose:
-            print 'Remove Out entries: %s' % keys
+            print("Remove Out entries: %s" % keys)
+
 
 # Two functions to load and unload the extension via ipython's
 # %load_ext magic command
@@ -503,9 +508,11 @@ def load_ipython_extension(ipython):
     ipython.register_magics(ReloadMagics)
     ipython.register_magics(ClearMemoryMagics)
 
+
 def unload_ipython_extension(ipython):
     """Called by %unload_ext magic command to remove this extension"""
     pass
+
 
 ## If this is imported, and I believe seem to be running under
 ## IPython, try to load the magic commands.  This should probably go
