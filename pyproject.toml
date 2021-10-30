@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "grasp3"
+version = "0.3.3"
+description = "Useful introspection tools."
+authors = ["Greg Novak <greg.novak@gmail.com>", "François Orieux <orieux@l2s.centralesupelec.fr>"]
+readme = "README"
+license = "Creative Commons CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
+homepage = "http://pypi.python.org/pypi/grasp/"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "Operating System :: OS Independent", ]
+include = ["LICENSE"]
+
+[tool.poetry.dependencies]
+python = "^3.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
